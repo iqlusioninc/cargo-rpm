@@ -6,8 +6,8 @@
 
 [crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
 [crate-link]: https://crates.io/crates/cargo-rpm
-[build-image]: https://circleci.com/gh/rustrpm/cargo-rpm.svg?style=shield
-[build-link]: https://circleci.com/gh/rustrpm/cargo-rpm
+[build-image]: https://circleci.com/gh/RustRPM/cargo-rpm.svg?style=shield
+[build-link]: https://circleci.com/gh/RustRPM/cargo-rpm
 [license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
 [license-link]: https://github.com/rustrpm/cargo-rpm/blob/master/LICENSE
 
