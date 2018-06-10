@@ -1,6 +1,7 @@
 //! Cargo.toml parser specialized for the `cargo rpm` use case
 
 use failure::Error;
+use iq_cli::color::BRIGHT_CYAN;
 use std::collections::BTreeMap;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
@@ -48,7 +49,7 @@ impl PackageConfig {
     {
         let mut file = File::open(filename.as_ref())?;
         let mut data = String::new();
-        file.read_to_string(&mut data).unwrap();
+        file.read_to_string(&mut data)?;
 
         let config: CargoConfig = toml::from_str(&data)
             .map_err(|e| format_err!("error parsing {}: {}", filename.as_ref().display(), e))?;
@@ -120,7 +121,11 @@ pub fn append_rpm_metadata(
 ) -> Result<(), Error> {
     assert!(!targets.is_empty(), "no target configuration?!");
 
-    status_ok!("Updating", path.canonicalize().unwrap().display());
+    status!(
+        BRIGHT_CYAN,
+        "Updating",
+        path.canonicalize().unwrap().display()
+    );
 
     let mut cargo_toml = OpenOptions::new().append(true).open(path)?;
 

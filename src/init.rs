@@ -1,15 +1,16 @@
 //! The `cargo rpm init` subcommand
 
 use failure::Error;
+use iq_cli::color::YELLOW;
 use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 
-use RPM_CONFIG_DIR;
 use config::{self, PackageConfig, CARGO_CONFIG_FILE};
 use target::TargetType;
 use templates::{ServiceParams, SpecParams};
+use RPM_CONFIG_DIR;
 
 /// Directory in which systemd service unit configs reside
 const SYSTEMD_DIR: &str = "/usr/lib/systemd/system";
@@ -53,7 +54,8 @@ impl InitOpts {
         if rpm_config_dir.exists() {
             if self.force {
                 let canonical_rpm_config_dir = rpm_config_dir.canonicalize()?;
-                status_ok!(
+                status!(
+                    YELLOW,
                     "Deleting",
                     "{} (forced)",
                     canonical_rpm_config_dir.display()
