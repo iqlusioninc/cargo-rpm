@@ -6,10 +6,10 @@
 
 [crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
 [crate-link]: https://crates.io/crates/cargo-rpm
-[build-image]: https://circleci.com/gh/iqlusion-io/crates.svg?style=shield
-[build-link]: https://circleci.com/gh/iqlusion-io/crates
+[build-image]: https://circleci.com/gh/rustrpm/crates.svg?style=shield
+[build-link]: https://circleci.com/gh/rustrpm/crates
 [license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
-[license-link]: https://github.com/iqlusion-io/crates/blob/master/LICENSE
+[license-link]: https://github.com/rustrpm/crates/blob/master/LICENSE
 
 A [cargo subcommand] for building `.rpm` releases of Rust projects.
 
@@ -46,7 +46,7 @@ Finished `.rpm` files will be placed in `target/release/rpmbuild/RPMs/<arch>`
 The **cargo-rpm** crate is distributed under the terms of the Apache License
 (Version 2.0).
 
-See [LICENSE] file in the `iqlusion-io/crates` toplevel directory for more
+See [LICENSE] file in the `rustrpm/crates` toplevel directory for more
 information.
 
-[LICENSE]: https://github.com/iqlusion-io/crates/blob/master/LICENSE
+[LICENSE]: https://github.com/rustrpm/crates/blob/master/LICENSE
