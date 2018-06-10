@@ -6,10 +6,10 @@
 
 [crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
 [crate-link]: https://crates.io/crates/cargo-rpm
-[build-image]: https://circleci.com/gh/rustrpm/crates.svg?style=shield
-[build-link]: https://circleci.com/gh/rustrpm/crates
+[build-image]: https://circleci.com/gh/rustrpm/cargo-rpm.svg?style=shield
+[build-link]: https://circleci.com/gh/rustrpm/cargo-rpm
 [license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
-[license-link]: https://github.com/rustrpm/crates/blob/master/LICENSE
+[license-link]: https://github.com/rustrpm/cargo-rpm/blob/master/LICENSE
 
 A [cargo subcommand] for building `.rpm` releases of Rust projects.
 
