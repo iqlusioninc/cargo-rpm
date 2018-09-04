@@ -32,7 +32,7 @@ pub struct PackageConfig {
     pub version: String,
 
     /// License of the package
-    pub license: Option<String>,
+    pub license: String,
 
     /// Homepage of the package
     pub homepage: Option<String>,

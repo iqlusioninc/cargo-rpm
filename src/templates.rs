@@ -26,7 +26,7 @@ pub struct SpecParams {
     pub summary: String,
 
     /// License of the *binary* contents of the RPM
-    pub license: Option<String>,
+    pub license: String,
 
     /// URL to a home page for this package
     pub url: Option<String>,
@@ -41,11 +41,9 @@ pub struct SpecParams {
 impl SpecParams {
     /// Create a new set of RPM spec template parameters
     pub fn new(package: &PackageConfig, service: Option<String>, use_sbin: bool) -> Self {
-        let rpm_license = package.license.as_ref().map(|spdx_license| {
-            license::convert(spdx_license).unwrap_or_else(|e| {
-                status_warn!("couldn't parse license {:?}: {}", spdx_license, e);
-                spdx_license.to_owned()
-            })
+        let rpm_license = license::convert(&package.license).unwrap_or_else(|e| {
+            status_warn!("couldn't parse license {:?}: {}", &package.license, e);
+            package.license.to_owned()
         });
 
         Self {
