@@ -6,30 +6,45 @@
 
 #![allow(non_camel_case_types)]
 
+use config::CargoLicense;
 use failure::Error;
+use std::fs;
 
 /// Convert between an SPDX 2.1 license syntax and the RPM `License` field syntax
-pub fn convert(license_string: &str) -> Result<String, Error> {
+pub fn convert(license: &CargoLicense) -> Result<String, Error> {
     let mut output = vec![];
 
-    if license_string.find('/').is_some() {
-        // Legacy syntax with '/' delimiter meaning "or"
-        for license in license_string.split('/') {
-            output.push(License::parse(license)?.as_rpm_str());
-        }
+    match license {
+        CargoLicense::License(ref s) => {
+            if s.find('/').is_some() {
+                // Legacy syntax with '/' delimiter meaning "or"
+                for lic in s.split('/') {
+                    output.push(License::parse(lic)?.as_rpm_str());
+                }
 
-        Ok(output.as_slice().join(" or "))
-    } else {
-        // Preferred syntax with "and"/"or" keywords
-        for token in license_string.split_whitespace() {
-            output.push(match token.to_lowercase().as_ref() {
-                "and" => "and",
-                "or" => "or",
-                other => License::parse(other)?.as_rpm_str(),
-            });
-        }
+                Ok(output.as_slice().join(" or "))
+            } else {
+                // Preferred syntax with "and"/"or" keywords
+                for token in s.split_whitespace() {
+                    output.push(match token.to_lowercase().as_ref() {
+                        "and" => "and",
+                        "or" => "or",
+                        other => License::parse(other)?.as_rpm_str(),
+                    });
+                }
 
-        Ok(output.as_slice().join(" "))
+                Ok(output.as_slice().join(" "))
+            }
+        }
+        CargoLicense::LicenseFile(ref path) => {
+            let license_string = fs::read_to_string(path)?;
+            // RPMs can only have 1 line in the license - so use the first.
+            let license_string = license_string
+                .lines()
+                .next()
+                .ok_or_else(|| format_err!("empty license file {}!", path))?;
+            Ok(format!("{}", license_string))
+        }
     }
 }
 
