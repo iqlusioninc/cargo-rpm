@@ -72,7 +72,8 @@ impl Builder {
         base_target_dir: &Path,
     ) -> Self {
         let mut profile = DEFAULT_PROFILE.to_owned();
-
+        // Default target is empty.
+        let mut target = "".to_owned();
         {
             let rpm_metadata = config.rpm_metadata().unwrap_or_else(|| {
                 status_error!("No [package.metadata.rpm] in Cargo.toml!");
@@ -85,10 +86,13 @@ impl Builder {
                 if let Some(ref p) = cargo.profile {
                     profile = p.to_owned();
                 }
+                if let Some(ref t) = cargo.target {
+                    target = t.to_owned();
+                }
             }
         }
 
-        let target_dir = base_target_dir.join(profile);
+        let target_dir = base_target_dir.join(target).join(profile);
         let rpmbuild_dir = target_dir.join("rpmbuild");
 
         Self {
@@ -129,6 +133,10 @@ impl Builder {
         let mut buildflags = vec![];
 
         if let Some(ref cargo) = self.rpm_metadata().cargo {
+            if let Some(ref t) = cargo.target {
+                buildflags.push(format!("--target={}", t));
+            }
+
             if let Some(ref b) = cargo.buildflags {
                 buildflags = b.clone();
             }
