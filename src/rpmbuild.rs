@@ -10,7 +10,7 @@ use std::process::{Child, Command, Stdio};
 pub const DEFAULT_RPMBUILD_PATH: &str = "/usr/bin/rpmbuild";
 
 /// Version of rpmbuild supported by this tool
-pub const SUPPORTED_RPMBUILD_VERSION: &str = "RPM version 4";
+pub const SUPPORTED_RPMBUILD_VERSION: &str = "RPM versione 4";
 
 /// Wrapper for the `rpmbuild` command
 pub struct Rpmbuild {
