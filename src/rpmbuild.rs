@@ -12,7 +12,7 @@ use std::{
 pub const DEFAULT_RPMBUILD_PATH: &str = "/usr/bin/rpmbuild";
 
 /// Version of rpmbuild supported by this tool
-pub const SUPPORTED_RPMBUILD_VERSION: &str = "RPM version 4";
+pub const SUPPORTED_RPMBUILD_VERSION: &str = " 4.";
 
 /// Wrapper for the `rpmbuild` command
 pub struct Rpmbuild {
@@ -52,7 +52,7 @@ impl Rpmbuild {
         }
 
         let vers = String::from_utf8(output.stdout)?;
-        if !vers.starts_with(SUPPORTED_RPMBUILD_VERSION) {
+        if !vers.contains(SUPPORTED_RPMBUILD_VERSION) {
             bail!("unexpected rpmbuild version string: {:?}", vers);
         }
 
