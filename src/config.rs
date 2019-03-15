@@ -21,6 +21,16 @@ pub struct CargoConfig {
     pub package: PackageConfig,
 }
 
+/// Struct representing possible license formats for Cargo.toml
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum CargoLicense {
+    ///SPDX identifier.
+    License(String),
+    /// Filename.
+    LicenseFile(String),
+}
+
 /// Struct representing a `Cargo.toml` file's `[package]` section
 #[derive(Clone, Debug, Deserialize)]
 pub struct PackageConfig {
@@ -34,7 +44,8 @@ pub struct PackageConfig {
     pub version: String,
 
     /// License of the package
-    pub license: String,
+    #[serde(flatten)]
+    pub license: CargoLicense,
 
     /// Homepage of the package
     pub homepage: Option<String>,

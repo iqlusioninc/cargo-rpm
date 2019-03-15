@@ -1,6 +1,9 @@
 //! Handlebars templates (for RPM specs, etc)
 
-use crate::{config::PackageConfig, license};
+use crate::{
+    config::{CargoLicense, PackageConfig},
+    license,
+};
 use failure::Error;
 use handlebars::Handlebars;
 use serde::Serialize;
@@ -42,8 +45,12 @@ impl SpecParams {
     /// Create a new set of RPM spec template parameters
     pub fn new(package: &PackageConfig, service: Option<String>, use_sbin: bool) -> Self {
         let rpm_license = license::convert(&package.license).unwrap_or_else(|e| {
-            status_warn!("couldn't parse license {:?}: {}", &package.license, e);
-            package.license.to_owned()
+            let default_lic = match package.license {
+                CargoLicense::License(ref lic) => lic.to_owned(),
+                CargoLicense::LicenseFile(ref name) => name.to_owned(),
+            };
+            status_warn!("couldn't parse license {:?}: {}", &default_lic, e);
+            default_lic
         });
 
         Self {
