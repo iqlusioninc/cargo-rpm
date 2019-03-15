@@ -1,16 +1,19 @@
 //! The `cargo rpm init` subcommand
 
+use crate::{
+    config::{self, PackageConfig, CARGO_CONFIG_FILE},
+    target::TargetType,
+    templates::{ServiceParams, SpecParams},
+    RPM_CONFIG_DIR,
+};
 use failure::Error;
 use iq_cli::color::YELLOW;
-use std::fs::{self, File, OpenOptions};
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::process::exit;
-
-use config::{self, PackageConfig, CARGO_CONFIG_FILE};
-use target::TargetType;
-use templates::{ServiceParams, SpecParams};
-use RPM_CONFIG_DIR;
+use std::{
+    fs::{self, File, OpenOptions},
+    io::Write,
+    path::{Path, PathBuf},
+    process::exit,
+};
 
 /// Directory in which systemd service unit configs reside
 const SYSTEMD_DIR: &str = "/usr/lib/systemd/system";

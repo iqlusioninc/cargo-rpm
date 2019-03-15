@@ -15,6 +15,10 @@ A [cargo subcommand] for building `.rpm` releases of Rust projects.
 
 [cargo subcommand]: https://github.com/rust-lang/cargo/wiki/Third-party-cargo-subcommands
 
+## Requirements
+
+- Rust 1.31+ (2018 edition)
+
 ## Installation
 
 Install `cargo rpm` by running: `cargo install cargo-rpm`.
