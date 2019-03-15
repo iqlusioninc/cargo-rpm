@@ -1,10 +1,12 @@
 //! Wrapper for running the `rpmbuild` command
 
 use failure::Error;
-use std::ffi::OsStr;
-use std::io::{BufRead, BufReader};
-use std::path::PathBuf;
-use std::process::{Child, Command, Stdio};
+use std::{
+    ffi::OsStr,
+    io::{BufRead, BufReader},
+    path::PathBuf,
+    process::{Child, Command, Stdio},
+};
 
 /// Path to the `rpmbuild` command
 pub const DEFAULT_RPMBUILD_PATH: &str = "/usr/bin/rpmbuild";
@@ -100,7 +102,7 @@ impl Rpmbuild {
 
         while reader.read_line(&mut string)? != 0 {
             if self.verbose {
-                status_ok!("rpmbuild", string.trim_right());
+                status_ok!("rpmbuild", string.trim_end());
                 string.clear();
             }
         }

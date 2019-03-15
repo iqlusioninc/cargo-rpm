@@ -1,24 +1,17 @@
 //! cargo-rpm: Cargo subcommand for creating RPM releases of Rust projects
 
-#![crate_name = "cargo_rpm"]
-#![crate_type = "bin"]
-#![deny(warnings, missing_docs, unsafe_code, unused_import_braces, unused_qualifications)]
+#![deny(warnings, missing_docs, unused_import_braces, unused_qualifications)]
+#![forbid(unsafe_code)]
 #![doc(html_root_url = "https://docs.rs/cargo-rpm/0.1.0")]
 
 #[macro_use]
 extern crate failure;
-extern crate flate2;
-extern crate gumdrop;
 #[macro_use]
 extern crate gumdrop_derive;
-extern crate handlebars;
 #[macro_use]
 extern crate iq_cli;
-extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate tar;
-extern crate toml;
 
 /// Support for building the release archive passed to rpmbuild
 pub mod archive;
@@ -47,12 +40,9 @@ pub mod templates;
 /// Subdirectory of a Rust project in which we keep RPM-related configs
 pub const RPM_CONFIG_DIR: &str = ".rpm";
 
+use crate::{builder::BuildOpts, init::InitOpts};
 use gumdrop::Options;
-use std::env;
-use std::process::exit;
-
-use builder::BuildOpts;
-use init::InitOpts;
+use std::{env, process::exit};
 
 /// Command line arguments (parsed by gumdrop)
 #[derive(Debug, Options)]
@@ -99,7 +89,8 @@ fn main() {
         RpmOpts::Help(opts) => help(opts.commands.as_slice()),
         RpmOpts::Init(init) => init.call(),
         RpmOpts::Build(build) => build.call(),
-    }.unwrap_or_else(|e| {
+    }
+    .unwrap_or_else(|e| {
         status_error!(e);
         exit(1)
     });
