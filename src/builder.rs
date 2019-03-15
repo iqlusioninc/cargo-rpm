@@ -1,18 +1,20 @@
 //! The `cargo rpm build` subcommand
 
+use crate::{
+    archive::Archive,
+    config::{PackageConfig, RpmConfig, CARGO_CONFIG_FILE},
+    rpmbuild::Rpmbuild,
+    target, RPM_CONFIG_DIR,
+};
 use failure::Error;
-use std::env;
-use std::fs::{self, File, OpenOptions};
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::process::{exit, Command};
-use std::time::SystemTime;
-
-use archive::Archive;
-use config::{PackageConfig, RpmConfig, CARGO_CONFIG_FILE};
-use rpmbuild::Rpmbuild;
-use target;
-use RPM_CONFIG_DIR;
+use std::{
+    env,
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+    process::{exit, Command},
+    time::SystemTime,
+};
 
 /// Default build profile to use
 pub const DEFAULT_PROFILE: &str = "release";

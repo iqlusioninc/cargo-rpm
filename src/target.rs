@@ -1,9 +1,10 @@
 //! Target-type autodetection for crates
 
 use failure::Error;
-use std::env;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+};
 
 /// Locate the project's target directory
 pub fn find_dir() -> Result<PathBuf, Error> {

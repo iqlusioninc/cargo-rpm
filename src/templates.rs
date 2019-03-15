@@ -1,14 +1,14 @@
 //! Handlebars templates (for RPM specs, etc)
 
+use crate::{config::PackageConfig, license};
 use failure::Error;
 use handlebars::Handlebars;
 use serde::Serialize;
-use std::fs::File;
-use std::io::Read;
-use std::path::{Path, PathBuf};
-
-use config::PackageConfig;
-use license;
+use std::{
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 /// Default RPM spec template (in toplevel `template/spec.hbs`)
 pub const DEFAULT_SPEC_TEMPLATE: &str = include_str!("../templates/spec.hbs");

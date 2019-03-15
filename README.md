@@ -1,19 +1,26 @@
-# cargo rpm
+# cargo-rpm
 
 [![Crate][crate-image]][crate-link]
 [![Build Status][build-image]][build-link]
 [![Apache 2.0 Licensed][license-image]][license-link]
+[![Gitter Chat][gitter-image]][gitter-link]
 
 [crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
 [crate-link]: https://crates.io/crates/cargo-rpm
-[build-image]: https://circleci.com/gh/RustRPM/cargo-rpm.svg?style=shield
-[build-link]: https://circleci.com/gh/RustRPM/cargo-rpm
 [license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
 [license-link]: https://github.com/rustrpm/cargo-rpm/blob/master/LICENSE
+[build-image]: https://travis-ci.org/RustRPM/cargo-rpm.svg?branch=master
+[build-link]: https://travis-ci.org/RustRPM/cargo-rpm
+[gitter-image]: https://badges.gitter.im/badge.svg
+[gitter-link]: https://gitter.im/RustRPM/communit
 
 A [cargo subcommand] for building `.rpm` releases of Rust projects.
 
 [cargo subcommand]: https://github.com/rust-lang/cargo/wiki/Third-party-cargo-subcommands
+
+## Requirements
+
+- Rust 1.31+ (2018 edition)
 
 ## Installation
 
