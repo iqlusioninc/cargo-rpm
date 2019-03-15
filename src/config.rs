@@ -94,6 +94,9 @@ pub struct CargoFlags {
     /// Release profile to use (default "release")
     pub profile: Option<String>,
 
+    /// The target - defaults to the host architecture
+    pub target: Option<String>,
+
     /// Flags to pass to cargo build
     pub buildflags: Option<Vec<String>>,
 }
