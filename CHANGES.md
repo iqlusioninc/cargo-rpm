@@ -1,3 +1,9 @@
+## [0.4.0] (2019-03-15)
+
+- Add support for crates using license-file ([#11], [#25])
+- Support custom targets ([#12], [#24])
+- Fix RPM version for languages other than English ([#18])
+
 ## [0.3.0] (2019-03-15)
 
 - Upgrade to Rust 2018 edition ([#19])
@@ -15,6 +21,12 @@
 
 - Initial release
 
+[0.4.0]: https://github.com/RustRPM/cargo-rpm/pull/26
+[#25]: https://github.com/RustRPM/cargo-rpm/pull/25
+[#24]: https://github.com/RustRPM/cargo-rpm/pull/24
+[#18]: https://github.com/RustRPM/cargo-rpm/pull/18
+[#12]: https://github.com/RustRPM/cargo-rpm/pull/12
+[#11]: https://github.com/RustRPM/cargo-rpm/pull/11
 [0.3.0]: https://github.com/RustRPM/cargo-rpm/pull/21
 [#19]: https://github.com/RustRPM/cargo-rpm/pull/19
 [#9]: https://github.com/RustRPM/cargo-rpm/pull/9
