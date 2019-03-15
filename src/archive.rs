@@ -5,12 +5,14 @@
 
 use failure::{self, Error};
 use flate2::{write::GzEncoder, Compression};
-use std::fs::{File, OpenOptions};
-use std::path::{Path, PathBuf};
-use std::time::UNIX_EPOCH;
+use std::{
+    fs::{File, OpenOptions},
+    path::{Path, PathBuf},
+    time::UNIX_EPOCH,
+};
 use tar::{Builder, Header};
 
-use config::{FileConfig, PackageConfig};
+use crate::config::{FileConfig, PackageConfig};
 
 /// Default user that owns files in the archive
 const DEFAULT_USERNAME: &str = "root";
@@ -129,7 +131,8 @@ impl Archive {
                     &base_dir,
                     config,
                     DEFAULT_TARGET_MODE,
-                ).unwrap()
+                )
+                .unwrap()
             })
             .collect();
 

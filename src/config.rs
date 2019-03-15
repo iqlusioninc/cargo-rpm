@@ -2,11 +2,13 @@
 
 use failure::Error;
 use iq_cli::color::BRIGHT_CYAN;
-use std::collections::BTreeMap;
-use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::process::exit;
+use std::{
+    collections::BTreeMap,
+    fs::{File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+    process::exit,
+};
 use toml;
 
 /// Name of the file containing cargo configuration. You know...

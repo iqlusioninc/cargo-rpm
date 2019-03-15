@@ -1,20 +1,21 @@
 [package]
 name        = "cargo-rpm"
-description = "Build RPMs from Rust projects using Cargo"
+description = "Build RPMs from Rust projects using Cargo workflows"
 version     = "0.1.1"
 authors     = ["Tony Arcieri <tony@iqlusion.io>"]
 license     = "Apache-2.0"
-homepage    = "https://github.com/rustrpm/cargo-rpm/"
 readme      = "README.md"
+edition     = "2018"
 categories  = ["command-line-utilities", "development-tools"]
 keywords    = ["rpm", "cargo", "package", "release"]
+homepage    = "https://github.com/rustrpm/cargo-rpm/"
 
 [dependencies]
 failure = "0.1"
 flate2 = { version = "1.0", default-features = false, features = ["zlib"] }
-gumdrop = "0.4"
-gumdrop_derive = "0.4"
-handlebars = "1.0.0-beta.2"
+gumdrop = "0.5"
+gumdrop_derive = "0.5"
+handlebars = "1.1"
 iq-cli = "0.1"
 serde = "1"
 serde_derive = "1"
