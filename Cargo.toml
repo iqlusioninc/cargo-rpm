@@ -10,9 +10,12 @@ categories  = ["command-line-utilities", "development-tools"]
 keywords    = ["rpm", "cargo", "package", "release"]
 homepage    = "https://github.com/rustrpm/cargo-rpm/"
 
+[badges]
+travis-ci = { repository = "rustrpm/cargo-rpm" }
+
 [dependencies]
 failure = "0.1"
-flate2 = { version = "1.0", default-features = false, features = ["zlib"] }
+flate2 = { version = "1", default-features = false, features = ["zlib"] }
 gumdrop = "0.5"
 gumdrop_derive = "0.5"
 handlebars = "1.1"

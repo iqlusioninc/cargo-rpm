@@ -40,9 +40,9 @@ pub mod templates;
 /// Subdirectory of a Rust project in which we keep RPM-related configs
 pub const RPM_CONFIG_DIR: &str = ".rpm";
 
+use crate::{builder::BuildOpts, init::InitOpts};
 use gumdrop::Options;
 use std::{env, process::exit};
-use crate::{builder::BuildOpts, init::InitOpts};
 
 /// Command line arguments (parsed by gumdrop)
 #[derive(Debug, Options)]
