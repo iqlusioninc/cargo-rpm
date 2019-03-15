@@ -1,3 +1,7 @@
+## [0.3.1] (2019-03-15)
+
+- Fix RPM version for languages other than English ([#18])
+
 ## [0.3.0] (2019-03-15)
 
 - Upgrade to Rust 2018 edition ([#19])
@@ -15,6 +19,8 @@
 
 - Initial release
 
+[0.3.1]: https://github.com/RustRPM/cargo-rpm/pull/23
+[#18]: https://github.com/RustRPM/cargo-rpm/pull/18
 [0.3.0]: https://github.com/RustRPM/cargo-rpm/pull/21
 [#19]: https://github.com/RustRPM/cargo-rpm/pull/19
 [#9]: https://github.com/RustRPM/cargo-rpm/pull/9
