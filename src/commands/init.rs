@@ -1,26 +1,27 @@
 //! The `cargo rpm init` subcommand
 
 use crate::{
+    builder::RPM_CONFIG_DIR,
     config::{self, PackageConfig, CARGO_CONFIG_FILE},
+    error::Error,
+    prelude::*,
     target::TargetType,
     templates::{ServiceParams, SpecParams},
-    RPM_CONFIG_DIR,
 };
-use failure::Error;
-use iq_cli::color::YELLOW;
+use abscissa_core::Command;
 use std::{
     fs::{self, File, OpenOptions},
     io::Write,
     path::{Path, PathBuf},
-    process::exit,
+    process,
 };
 
 /// Directory in which systemd service unit configs reside
 const SYSTEMD_DIR: &str = "/usr/lib/systemd/system";
 
-/// Options for the `cargo rpm init` subcommand
-#[derive(Debug, Default, Options)]
-pub struct InitOpts {
+/// The `cargo rpm init` subcommand
+#[derive(Command, Debug, Default, Options)]
+pub struct InitCmd {
     /// Force (re-)generation, even if .rpm exists or the target type is unsupported
     #[options(long = "force")]
     pub force: bool,
@@ -42,40 +43,46 @@ pub struct InitOpts {
     pub template: Option<String>,
 }
 
-impl InitOpts {
+impl Runnable for InitCmd {
     /// Invoke the `cargo rpm init` subcommand
-    pub fn call(&self) -> Result<(), Error> {
+    fn run(&self) {
+        self.init().unwrap_or_else(|err| {
+            status_err!("{}", err);
+            process::exit(1);
+        })
+    }
+}
+
+impl InitCmd {
+    /// Initialize the `.rpm` subdirectory
+    // TODO(tarcieri): refactor this into smaller (testable) functions
+    pub fn init(&self) -> Result<(), Error> {
         // Calculate paths relative to the current directory
         let crate_root = PathBuf::from(".");
         let cargo_toml = crate_root.join(CARGO_CONFIG_FILE);
         let rpm_config_dir = crate_root.join(RPM_CONFIG_DIR);
 
         // Read Cargo.toml
-        let package_config = PackageConfig::load(&cargo_toml)?;
+        let config = app_config();
 
         // Check if `.rpm` already exists
         if rpm_config_dir.exists() {
             if self.force {
                 let canonical_rpm_config_dir = rpm_config_dir.canonicalize()?;
-                status!(
-                    YELLOW,
-                    "Deleting",
-                    "{} (forced)",
-                    canonical_rpm_config_dir.display()
-                );
+                status_warn!("deleting {} (forced)", canonical_rpm_config_dir.display());
                 fs::remove_dir_all(&rpm_config_dir)?;
             } else {
-                status_error!(
+                status_err!(
                     "destination `{}` already exists!",
                     rpm_config_dir.canonicalize().unwrap().display()
                 );
-                exit(1);
+                process::exit(1);
             }
         }
 
         // Check if we're creating a systemd service unit for this crate
         let service_name = if self.service.is_some() || self.systemd {
-            Some(format!("{}.service", package_config.name))
+            Some(format!("{}.service", config.package().name))
         } else {
             None
         };
@@ -90,21 +97,25 @@ impl InitOpts {
                     // If forced, just return an empty target list
                     vec![]
                 } else {
-                    status_error!("detected unsupported crate type: library (-f to override)");
-                    exit(1);
+                    status_err!("detected unsupported crate type: library (-f to override)");
+                    process::exit(1);
                 }
             }
-            TargetType::Bin => vec![package_config.name.clone()],
+            TargetType::Bin => vec![config.package().name.clone()],
             TargetType::MultiBin(targets) => targets,
         };
 
         // Create `.rpm` directory
         fs::create_dir(&rpm_config_dir)?;
-        status_ok!("Created", rpm_config_dir.canonicalize().unwrap().display());
+        status_ok!(
+            "Created",
+            "{}",
+            rpm_config_dir.canonicalize().unwrap().display()
+        );
 
         // Render `.rpm/<cratename>.spec`
-        let spec_path = rpm_config_dir.join(format!("{}.spec", package_config.name));
-        let spec_params = SpecParams::new(&package_config, service_name.clone(), use_sbin);
+        let spec_path = rpm_config_dir.join(format!("{}.spec", config.package().name));
+        let spec_params = SpecParams::new(&config.package(), service_name.clone(), use_sbin);
         render_spec(&spec_path, &self.template, &spec_params)?;
 
         // (Optional) Render `.rpm/<cratename>.service` (systemd service unit config)
@@ -112,12 +123,12 @@ impl InitOpts {
             render_service(
                 &rpm_config_dir.join(service),
                 &self.service,
-                &package_config,
+                config.package(),
             )?;
         }
 
         // Update Cargo.toml with RPM metadata
-        if package_config.rpm_metadata().is_some() && !self.force {
+        if config.package().rpm_metadata().is_some() && !self.force {
             status_warn!("not updating Cargo.toml because [package.metadata.rpm] already present");
         } else {
             let mut extra_files = vec![];
@@ -132,7 +143,7 @@ impl InitOpts {
         status_ok!(
             "Finished",
             "{} configured (type \"cargo rpm build\" to build)",
-            package_config.name
+            config.package().name
         );
 
         Ok(())
@@ -156,7 +167,11 @@ fn render_spec(
 
     spec_file.write_all(spec_rendered.as_bytes())?;
 
-    status_ok!("Rendered", spec_path.canonicalize().unwrap().display());
+    status_ok!(
+        "Rendered",
+        "{}",
+        spec_path.canonicalize().unwrap().display()
+    );
 
     Ok(())
 }
@@ -174,7 +189,11 @@ fn render_service(
     let mut service_file = File::create(service_path)?;
     service_file.write_all(service_rendered.as_bytes())?;
 
-    status_ok!("Rendered", service_path.canonicalize().unwrap().display());
+    status_ok!(
+        "Rendered",
+        "{}",
+        service_path.canonicalize().unwrap().display()
+    );
 
     Ok(())
 }

@@ -1,6 +1,6 @@
 //! Target-type autodetection for crates
 
-use failure::Error;
+use crate::error::{Error, ErrorKind};
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -25,7 +25,7 @@ pub fn find_dir() -> Result<PathBuf, Error> {
 
         path = match path.parent() {
             Some(p) => p.to_path_buf(),
-            None => bail!("couldn't find target directory!"),
+            None => fail!(ErrorKind::Target, "couldn't find target directory!"),
         }
     }
 }
@@ -53,7 +53,11 @@ impl TargetType {
                 let mut bin_str = bin?.path().display().to_string();
 
                 if !bin_str.ends_with(".rs") {
-                    bail!("unrecognized file in src/bin: {:?}", bin_str);
+                    fail!(
+                        ErrorKind::Target,
+                        "unrecognized file in src/bin: {:?}",
+                        bin_str
+                    );
                 }
 
                 // Remove .rs extension
@@ -68,7 +72,10 @@ impl TargetType {
         } else if base_path.join("src/lib.rs").exists() {
             Ok(TargetType::Lib)
         } else {
-            bail!("couldn't detect crate type (no main.rs or lib.rs?)");
+            fail!(
+                ErrorKind::Target,
+                "couldn't detect crate type (no main.rs or lib.rs?)"
+            );
         }
     }
 }

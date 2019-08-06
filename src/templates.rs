@@ -2,9 +2,9 @@
 
 use crate::{
     config::{CargoLicense, PackageConfig},
+    error::{Error, ErrorKind},
     license,
 };
-use failure::Error;
 use handlebars::Handlebars;
 use serde::Serialize;
 use std::{
@@ -125,7 +125,7 @@ fn load_template(template_path: Option<&Path>, default_template: &str) -> Result
 fn render_template<T: Serialize>(name: &str, template: &str, data: &T) -> Result<String, Error> {
     let mut handlebars = Handlebars::new();
     handlebars.register_template_string(name, template).unwrap();
-    handlebars
+    Ok(handlebars
         .render(name, data)
-        .map_err(|e| format_err!("Error rendering template: {}", e))
+        .map_err(|e| err!(ErrorKind::Template, "Error rendering template: {}", e))?)
 }

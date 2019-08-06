@@ -2,25 +2,16 @@
 
 [![Crate][crate-image]][crate-link]
 [![Build Status][build-image]][build-link]
+[![Safety Dance][safety-image]][safety-link]
+![Rust 1.35+][rustc-image]
 [![Apache 2.0 Licensed][license-image]][license-link]
 [![Gitter Chat][gitter-image]][gitter-link]
 
-[crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
-[crate-link]: https://crates.io/crates/cargo-rpm
-[license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
-[license-link]: https://github.com/rustrpm/cargo-rpm/blob/master/LICENSE
-[build-image]: https://travis-ci.org/RustRPM/cargo-rpm.svg?branch=master
-[build-link]: https://travis-ci.org/RustRPM/cargo-rpm
-[gitter-image]: https://badges.gitter.im/badge.svg
-[gitter-link]: https://gitter.im/RustRPM/communit
-
-A [cargo subcommand] for building `.rpm` releases of Rust projects.
-
-[cargo subcommand]: https://github.com/rust-lang/cargo/wiki/Third-party-cargo-subcommands
+[cargo subcommand] for building `.rpm` releases of Rust projects.
 
 ## Requirements
 
-- Rust 1.31+ (2018 edition)
+- Rust **1.35**+
 
 ## Installation
 
@@ -61,3 +52,21 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+[//]: # (badges)
+
+[crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
+[crate-link]: https://crates.io/crates/cargo-rpm
+[build-image]: https://travis-ci.org/RustRPM/cargo-rpm.svg?branch=master
+[build-link]: https://travis-ci.org/RustRPM/cargo-rpm
+[rustc-image]: https://img.shields.io/badge/rustc-1.35+-blue.svg
+[safety-image]: https://img.shields.io/badge/unsafe-forbidden-success.svg
+[safety-link]: https://github.com/rust-secure-code/safety-dance/
+[license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
+[license-link]: https://github.com/rustrpm/cargo-rpm/blob/master/LICENSE
+[gitter-image]: https://badges.gitter.im/badge.svg
+[gitter-link]: https://gitter.im/RustRPM/communit
+
+[//]: # (general links)
+
+[cargo subcommand]: https://github.com/rust-lang/cargo/wiki/Third-party-cargo-subcommands

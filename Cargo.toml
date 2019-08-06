@@ -14,19 +14,19 @@ homepage    = "https://github.com/rustrpm/cargo-rpm/"
 travis-ci = { repository = "rustrpm/cargo-rpm" }
 
 [dependencies]
+abscissa_core = "0.3"
 failure = "0.1"
 flate2 = { version = "1", default-features = false, features = ["zlib"] }
-gumdrop = "0.5"
-gumdrop_derive = "0.5"
-handlebars = "1.1"
-iq-cli = "0.1"
-serde = "1"
-serde_derive = "1"
+gumdrop = "0.6"
+lazy_static = "1"
+handlebars = "2"
+serde = { version = "1", features = ["serde_derive"] }
 tar = "0.4"
-toml = "0.4"
 
-[package.metadata.rpm.cargo]
-buildflags = ["--release"]
+[dev-dependencies.abscissa_core]
+version = "0.3.0"
+features = ["testing"]
 
-[package.metadata.rpm.targets]
-cargo-rpm = { path = "/usr/bin/cargo-rpm" }
+[package.metadata.rpm]
+cargo = { buildflags = ["--release"] }
+targets = { cargo-rpm = { path = "/usr/bin/cargo-rpm" } }
