@@ -1,51 +1,28 @@
-//! The `cargo rpm build` subcommand
+//! RPM builder
 
 use crate::{
     archive::Archive,
-    config::{PackageConfig, RpmConfig, CARGO_CONFIG_FILE},
+    config::{PackageConfig, RpmConfig},
+    error::Error,
     rpmbuild::Rpmbuild,
-    target, RPM_CONFIG_DIR,
 };
-use failure::Error;
 use std::{
     env,
     fs::{self, File, OpenOptions},
     io::{Read, Write},
     path::{Path, PathBuf},
-    process::{exit, Command},
-    time::SystemTime,
+    process::{self, Command},
+    time::Instant,
 };
 
 /// Default build profile to use
 pub const DEFAULT_PROFILE: &str = "release";
 
+/// Subdirectory of a Rust project in which we keep RPM-related configs
+pub const RPM_CONFIG_DIR: &str = ".rpm";
+
 /// Placeholder string in the `.spec` file we use for the version
 pub const VERSION_PLACEHOLDER: &str = "@@VERSION@@";
-
-/// Options for the `cargo rpm build` subcommand
-#[derive(Debug, Default, Options)]
-pub struct BuildOpts {
-    /// Print additional information about the build
-    #[options(long = "verbose")]
-    pub verbose: bool,
-}
-
-impl BuildOpts {
-    /// Invoke the `cargo rpm build` subcommand
-    pub fn call(&self) -> Result<(), Error> {
-        // Calculate paths relative to the current directory
-        let crate_root = PathBuf::from(".");
-        let cargo_toml = crate_root.join(CARGO_CONFIG_FILE);
-        let rpm_config_dir = crate_root.join(RPM_CONFIG_DIR);
-
-        // Read Cargo.toml
-        let package_config = PackageConfig::load(&cargo_toml)?;
-        let target_dir = target::find_dir()?;
-
-        Builder::new(package_config, self.verbose, &rpm_config_dir, &target_dir).build()?;
-        Ok(())
-    }
-}
 
 /// Build RPMs from Rust projects
 pub struct Builder {
@@ -68,7 +45,7 @@ pub struct Builder {
 impl Builder {
     /// Create a new RPM builder
     pub fn new(
-        config: PackageConfig,
+        config: &PackageConfig,
         verbose: bool,
         rpm_config_dir: &Path,
         base_target_dir: &Path,
@@ -78,10 +55,10 @@ impl Builder {
         let mut target = "".to_owned();
         {
             let rpm_metadata = config.rpm_metadata().unwrap_or_else(|| {
-                status_error!("No [package.metadata.rpm] in Cargo.toml!");
+                status_err!("No [package.metadata.rpm] in Cargo.toml!");
                 println!("\nRun 'cargo rpm init' to configure crate for RPM builds");
 
-                exit(1);
+                process::exit(1);
             });
 
             if let Some(ref cargo) = rpm_metadata.cargo {
@@ -98,7 +75,7 @@ impl Builder {
         let rpmbuild_dir = target_dir.join("rpmbuild");
 
         Self {
-            config,
+            config: config.clone(),
             verbose,
             rpm_config_dir: rpm_config_dir.into(),
             target_dir,
@@ -108,7 +85,7 @@ impl Builder {
 
     /// Build an RPM for this package
     pub fn build(&self) -> Result<(), Error> {
-        let began_at = SystemTime::now();
+        let began_at = Instant::now();
 
         self.cargo_build()?;
         self.create_archive()?;
@@ -120,8 +97,9 @@ impl Builder {
             "{}-{}.rpm: built in {} secs",
             self.config.name,
             self.config.version,
-            began_at.elapsed()?.as_secs()
+            began_at.elapsed().as_secs()
         );
+
         Ok(())
     }
 
@@ -155,7 +133,7 @@ impl Builder {
 
         // Exit with the same exit code cargo used
         if !status.success() {
-            exit(status.code().unwrap_or(1));
+            process::exit(status.code().unwrap_or(1));
         }
 
         Ok(())

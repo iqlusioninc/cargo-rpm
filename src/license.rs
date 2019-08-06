@@ -6,8 +6,10 @@
 
 #![allow(non_camel_case_types)]
 
-use crate::config::CargoLicense;
-use failure::Error;
+use crate::{
+    config::CargoLicense,
+    error::{Error, ErrorKind},
+};
 use std::fs;
 
 /// Convert between an SPDX 2.1 license syntax and the RPM `License` field syntax
@@ -43,7 +45,7 @@ pub fn convert(license: &CargoLicense) -> Result<String, Error> {
             let license_string = license_string
                 .lines()
                 .next()
-                .ok_or_else(|| format_err!("empty license file {}!", path))?
+                .ok_or_else(|| err!(ErrorKind::License, "empty license file {}!", path))?
                 .to_owned();
 
             Ok(license_string)
@@ -149,7 +151,7 @@ impl License {
             "lgpl-3.0-or-later" => License::LGPL_3_0_OR_LATER,
             "mit" => License::MIT,
             "mpl-2.0" => License::MPL_2_0,
-            _ => bail!("unknown license: {:?}", name),
+            _ => fail!(ErrorKind::License, "unknown license: {:?}", name),
         })
     }
 

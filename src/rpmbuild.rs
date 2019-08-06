@@ -1,6 +1,6 @@
 //! Wrapper for running the `rpmbuild` command
 
-use failure::Error;
+use crate::error::{Error, ErrorKind};
 use std::{
     ffi::OsStr,
     io::{BufRead, BufReader},
@@ -41,19 +41,38 @@ impl Rpmbuild {
         let output = Command::new(&self.path)
             .args(&["--version"])
             .output()
-            .map_err(|e| format_err!("error running {}: {}", self.path.display(), e))?;
+            .map_err(|e| {
+                err!(
+                    ErrorKind::Rpmbuild,
+                    "error running {}: {}",
+                    self.path.display(),
+                    e
+                )
+            })?;
 
         if !output.status.success() {
-            bail!(
+            fail!(
+                ErrorKind::Rpmbuild,
                 "error running {} (exit status: {})",
                 &self.path.display(),
                 &output.status
             );
         }
 
-        let vers = String::from_utf8(output.stdout)?;
+        let vers = String::from_utf8(output.stdout).map_err(|e| {
+            err!(
+                ErrorKind::Rpmbuild,
+                "error parsing rpmbuild output as UTF-8: {}",
+                e
+            )
+        })?;
+
         if !vers.contains(SUPPORTED_RPMBUILD_VERSION) {
-            bail!("unexpected rpmbuild version string: {:?}", vers);
+            fail!(
+                ErrorKind::Rpmbuild,
+                "unexpected rpmbuild version string: {:?}",
+                vers
+            );
         }
 
         let parts: Vec<&str> = vers.split_whitespace().collect();
@@ -75,7 +94,14 @@ impl Rpmbuild {
                 Stdio::null()
             })
             .spawn()
-            .map_err(|e| format_err!("error running {}: {}", self.path.display(), e))?;
+            .map_err(|e| {
+                err!(
+                    ErrorKind::Rpmbuild,
+                    "error running {}: {}",
+                    self.path.display(),
+                    e
+                )
+            })?;
 
         let output = self.read_rpmbuild_output(&mut rpmbuild)?;
         let status = rpmbuild.wait()?;
@@ -87,7 +113,8 @@ impl Rpmbuild {
                 eprintln!("{}", &output);
             }
 
-            bail!(
+            fail!(
+                ErrorKind::Rpmbuild,
                 "error running {} (exit status: {})",
                 self.path.display(),
                 status

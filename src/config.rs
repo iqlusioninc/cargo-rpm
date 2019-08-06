@@ -1,32 +1,43 @@
-//! Cargo.toml parser specialized for the `cargo rpm` use case
+//! `Cargo.toml` parser specialized for the `cargo rpm` use case
 
-use failure::Error;
-use iq_cli::color::BRIGHT_CYAN;
+use crate::error::Error;
+use abscissa_core::Config;
+use serde::Deserialize;
 use std::{
     collections::BTreeMap,
-    fs::{File, OpenOptions},
-    io::{Read, Write},
+    fs::OpenOptions,
+    io::Write,
     path::{Path, PathBuf},
-    process::exit,
+    process,
 };
-use toml;
 
-/// Name of the file containing cargo configuration. You know...
+/// Cargo configuration for the current project
 pub const CARGO_CONFIG_FILE: &str = "Cargo.toml";
 
-/// Struct representing a `Cargo.toml` file
-#[derive(Debug, Deserialize)]
+/// The parts of `Cargo.toml` that `cargo rpm` cares about
+#[derive(Config, Debug, Default, Deserialize)]
 pub struct CargoConfig {
     /// Cargo package configuration
-    pub package: PackageConfig,
+    package: Option<PackageConfig>,
+}
+
+impl CargoConfig {
+    /// The `[package]` section of `Cargo.toml`
+    pub fn package(&self) -> &PackageConfig {
+        self.package.as_ref().unwrap_or_else(|| {
+            status_err!("no [package] section in Cargo.toml!");
+            process::exit(1);
+        })
+    }
 }
 
 /// Struct representing possible license formats for Cargo.toml
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CargoLicense {
-    ///SPDX identifier.
+    /// SPDX identifier.
     License(String),
+
     /// Filename.
     LicenseFile(String),
 }
@@ -55,27 +66,9 @@ pub struct PackageConfig {
 }
 
 impl PackageConfig {
-    /// Parse the given path (i.e. `Cargo.toml`), returning a PackageConfig struct
-    pub fn load<P>(filename: P) -> Result<PackageConfig, Error>
-    where
-        P: AsRef<Path>,
-    {
-        let mut file = File::open(filename.as_ref())?;
-        let mut data = String::new();
-        file.read_to_string(&mut data)?;
-
-        let config: CargoConfig = toml::from_str(&data)
-            .map_err(|e| format_err!("error parsing {}: {}", filename.as_ref().display(), e))?;
-
-        Ok(config.package)
-    }
-
     /// Get the RpmConfig for this package (if present)
     pub fn rpm_metadata(&self) -> Option<&RpmConfig> {
-        match self.metadata {
-            Some(ref m) => m.rpm.as_ref(),
-            None => None,
-        }
+        self.metadata.as_ref().and_then(|md| md.rpm.as_ref())
     }
 }
 
@@ -137,17 +130,13 @@ pub fn append_rpm_metadata(
 ) -> Result<(), Error> {
     assert!(!targets.is_empty(), "no target configuration?!");
 
-    status!(
-        BRIGHT_CYAN,
-        "Updating",
-        path.canonicalize().unwrap().display()
-    );
+    status_ok!("Updating", "{}", path.canonicalize().unwrap().display());
 
     let mut cargo_toml = OpenOptions::new().append(true).open(path)?;
 
     // Flags to pass to cargo when doing a release
     // TODO: use serde serializer?
-    writeln!(cargo_toml, "\n[package.metadata.rpm.cargo]")?;
+    writeln!(cargo_toml, "\n[package.metadata.rpm]")?;
     writeln!(cargo_toml, "buildflags = [\"--release\"]")?;
 
     // Target files to include in an archive
@@ -168,13 +157,13 @@ pub fn append_rpm_metadata(
 
         for path in extra_files {
             if !path.is_absolute() {
-                status_error!("path is not absolute: {}", path.display());
-                exit(1);
+                status_err!("path is not absolute: {}", path.display());
+                process::exit(1);
             }
 
             let file = path.file_name().unwrap_or_else(|| {
-                status_error!("path has no filename: {}", path.display());
-                exit(1);
+                status_err!("path has no filename: {}", path.display());
+                process::exit(1);
             });
 
             writeln!(
