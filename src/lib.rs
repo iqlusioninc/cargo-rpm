@@ -2,7 +2,7 @@
 
 #![deny(warnings, missing_docs, trivial_casts, unused_qualifications)]
 #![forbid(unsafe_code)]
-#![doc(html_root_url = "https://docs.rs/cargo-rpm/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/cargo-rpm/0.5.0")]
 
 #[macro_use]
 extern crate abscissa_core;
