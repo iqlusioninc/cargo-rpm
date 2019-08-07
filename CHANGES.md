@@ -1,3 +1,7 @@
+## [0.5.0] (2019-08-07)
+
+- Migrate from `iq-cli` to Abscissa application framework ([#29])
+
 ## [0.4.0] (2019-03-15)
 
 - Add support for crates using license-file ([#11], [#25])
@@ -21,6 +25,8 @@
 
 - Initial release
 
+[0.5.0]: https://github.com/RustRPM/cargo-rpm/pull/30
+[#29]: https://github.com/RustRPM/cargo-rpm/pull/29
 [0.4.0]: https://github.com/RustRPM/cargo-rpm/pull/26
 [#25]: https://github.com/RustRPM/cargo-rpm/pull/25
 [#24]: https://github.com/RustRPM/cargo-rpm/pull/24
