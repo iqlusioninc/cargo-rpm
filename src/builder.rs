@@ -24,6 +24,9 @@ pub const RPM_CONFIG_DIR: &str = ".rpm";
 /// Placeholder string in the `.spec` file we use for the version
 pub const VERSION_PLACEHOLDER: &str = "@@VERSION@@";
 
+/// Placeholder string in the `.spec` file we use for the release
+pub const RELEASE_PLACEHOLDER: &str = "@@RELEASE@@";
+
 /// Build RPMs from Rust projects
 pub struct Builder {
     /// Cargo.toml configuration
@@ -92,11 +95,14 @@ impl Builder {
         self.render_spec()?;
         self.rpmbuild()?;
 
+        let (version, release) = self.config.version();
+
         status_ok!(
             "Finished",
-            "{}-{}.rpm: built in {} secs",
+            "{}-{}-{}.rpm: built in {} secs",
             self.config.name,
-            self.config.version,
+            version,
+            release,
             began_at.elapsed().as_secs()
         );
 
@@ -144,8 +150,10 @@ impl Builder {
         let sources_dir = self.rpmbuild_dir.join("SOURCES");
         fs::create_dir_all(&sources_dir)?;
 
+        let (version, _) = self.config.version();
+
         // Build a tarball containing the RPM's contents
-        let archive_file = format!("{}-{}.tar.gz", self.config.name, self.config.version);
+        let archive_file = format!("{}-{}.tar.gz", self.config.name, version);
         let archive_path = sources_dir.join(&archive_file);
 
         if self.verbose {
@@ -165,8 +173,13 @@ impl Builder {
         let mut spec_template = String::new();
         spec_src.read_to_string(&mut spec_template)?;
 
+        let (version, release) = self.config.version();
+
         // Replace `@@VERSION@@` with the crate's actual version
-        let spec_rendered = str::replace(&spec_template, VERSION_PLACEHOLDER, &self.config.version);
+        let spec_ver_rendered = str::replace(&spec_template, VERSION_PLACEHOLDER, &version);
+
+        // Replace `@@RELEASE@@` with the crate's release
+        let spec_rendered = str::replace(&spec_ver_rendered, RELEASE_PLACEHOLDER, &release);
 
         let spec_dir = self.rpmbuild_dir.join("SPECS");
         fs::create_dir_all(&spec_dir)?;
@@ -184,7 +197,8 @@ impl Builder {
 
     /// Run rpmbuild
     fn rpmbuild(&self) -> Result<(), Error> {
-        let rpm_file = format!("{}-{}.rpm", self.config.name, self.config.version);
+        let (version, release) = self.config.version();
+        let rpm_file = format!("{}-{}-{}.rpm", self.config.name, version, release);
         let cmd = Rpmbuild::new(self.verbose)?;
 
         status_ok!(

@@ -70,6 +70,19 @@ impl PackageConfig {
     pub fn rpm_metadata(&self) -> Option<&RpmConfig> {
         self.metadata.as_ref().and_then(|md| md.rpm.as_ref())
     }
+
+    /// Get the version and release for this package
+    pub fn version(&self) -> (String, String) {
+        let version_split: Vec<&str> = self.version.split('-').collect();
+        let version = version_split[0].into();
+        // Get the release, defaulting to 1 if there isn't one present
+        // For a pre-release version, cargo release appends -alpha.0, -beta.1, etc.
+        let release = version_split
+            .get(1)
+            .map(|rel| format!("0.{}", rel))
+            .unwrap_or_else(|| "1".into());
+        (version, release)
+    }
 }
 
 /// The `[package.metadata]` table: ignored by Cargo, but we can put stuff there
