@@ -124,7 +124,7 @@ impl Builder {
             }
 
             if let Some(ref b) = cargo.buildflags {
-                buildflags = b.clone();
+                buildflags.append(&mut b.clone());
             }
         };
 
