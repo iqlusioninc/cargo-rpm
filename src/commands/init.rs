@@ -88,7 +88,7 @@ impl InitCmd {
         };
 
         // Autodetect whether to place target files in `/usr/bin` or `/usr/sbin`
-        let use_sbin = self.sbin || service_name.is_some();
+        let use_sbin = self.sbin;
 
         // Autodetect target types
         let targets = match TargetType::detect(&crate_root)? {
