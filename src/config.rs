@@ -149,7 +149,7 @@ pub fn append_rpm_metadata(
 
     // Flags to pass to cargo when doing a release
     // TODO: use serde serializer?
-    writeln!(cargo_toml, "\n[package.metadata.rpm]")?;
+    writeln!(cargo_toml, "\n[package.metadata.rpm.cargo]")?;
     writeln!(cargo_toml, "buildflags = [\"--release\"]")?;
 
     // Target files to include in an archive
