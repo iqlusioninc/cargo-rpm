@@ -9,7 +9,7 @@ use std::{
 };
 
 /// Path to the `rpmbuild` command
-pub const DEFAULT_RPMBUILD_PATH: &str = "/usr/bin/rpmbuild";
+pub const DEFAULT_RPMBUILD_PATH: &str = "rpmbuild";
 
 /// Version of rpmbuild supported by this tool
 pub const SUPPORTED_RPMBUILD_VERSION: &str = " 4.";
