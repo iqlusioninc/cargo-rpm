@@ -1,3 +1,10 @@
+## [0.7.0] (2019-11-30)
+
+- Upgrade to Abscissa v0.4 ([#44])
+- Get rpmbuild from `$PATH` rather than hardcoding ([#43])
+- Remove the assumption that `service` -> `sbin` ([#42])
+- Fix issues with custom release/target usage ([#41])
+
 ## [0.6.0] (2019-08-10)
 
 - Use `cargo-release` alpha version numbers if available ([#31])
@@ -29,6 +36,11 @@
 
 - Initial release
 
+[0.7.0]: https://github.com/RustRPM/cargo-rpm/pull/45
+[#44]: https://github.com/RustRPM/cargo-rpm/pull/44
+[#43]: https://github.com/RustRPM/cargo-rpm/pull/43
+[#42]: https://github.com/RustRPM/cargo-rpm/pull/42
+[#41]: https://github.com/RustRPM/cargo-rpm/pull/41
 [0.6.0]: https://github.com/RustRPM/cargo-rpm/pull/32
 [#31]: https://github.com/RustRPM/cargo-rpm/pull/29
 [0.5.0]: https://github.com/RustRPM/cargo-rpm/pull/30
