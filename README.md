@@ -3,7 +3,7 @@
 [![Crate][crate-image]][crate-link]
 [![Build Status][build-image]][build-link]
 [![Safety Dance][safety-image]][safety-link]
-![Rust 1.35+][rustc-image]
+![MSRV][rustc-image]
 [![Apache 2.0 Licensed][license-image]][license-link]
 [![Gitter Chat][gitter-image]][gitter-link]
 
@@ -11,7 +11,7 @@
 
 ## Requirements
 
-- Rust **1.35**+
+- Rust **1.36**+
 
 ## Installation
 
@@ -59,7 +59,7 @@ limitations under the License.
 [crate-link]: https://crates.io/crates/cargo-rpm
 [build-image]: https://travis-ci.org/RustRPM/cargo-rpm.svg?branch=master
 [build-link]: https://travis-ci.org/RustRPM/cargo-rpm
-[rustc-image]: https://img.shields.io/badge/rustc-1.35+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.36+-blue.svg
 [safety-image]: https://img.shields.io/badge/unsafe-forbidden-success.svg
 [safety-link]: https://github.com/rust-secure-code/safety-dance/
 [license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
