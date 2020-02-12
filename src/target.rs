@@ -13,20 +13,10 @@ pub fn find_dir() -> Result<PathBuf, Error> {
         return Ok(PathBuf::from(p));
     }
 
-    // Check all parents of the current directory for a target directory.
-    // We could call `cargo metadata` to find it but this is much cheaper.
-    let mut path = fs::canonicalize(".")?;
-
-    loop {
-        let target = path.join("target");
-        if target.exists() {
-            return Ok(target);
-        }
-
-        path = match path.parent() {
-            Some(p) => p.to_path_buf(),
-            None => fail!(ErrorKind::Target, "couldn't find target directory!"),
-        }
+    let mut cmd = cargo_metadata::MetadataCommand::new();
+    match cmd.exec() {
+        Ok(metadata) => Ok(metadata.target_directory),
+        Err(_) => fail!(ErrorKind::Target, "couldn't find target directory!"),
     }
 }
 
