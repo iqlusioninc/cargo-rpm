@@ -141,13 +141,28 @@ impl Archive {
             .collect();
 
         if let Some(ref extra_files) = rpm_metadata.files {
+            let mut queue = std::collections::VecDeque::new();
+
             for (name, config) in extra_files {
-                archive_files.push(ArchiveFile::new(
-                    &rpm_config_dir.join(name),
-                    &base_dir,
-                    config,
-                    DEFAULT_FILE_MODE,
-                )?);
+                queue.push_back((rpm_config_dir.join(name), config.clone()));
+            }
+
+            while let Some((path, config)) = queue.pop_front() {
+                if path.is_dir() {
+                    for sub in path.read_dir()? {
+                        let mut config = config.clone();
+                        let sub = sub?;
+                        config.path.push(sub.file_name());
+                        queue.push_back((sub.path(), config));
+                    }
+                } else {
+                    archive_files.push(ArchiveFile::new(
+                        &path,
+                        &base_dir,
+                        &config,
+                        DEFAULT_FILE_MODE,
+                    )?);
+                }
             }
         }
 
