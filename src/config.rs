@@ -103,6 +103,9 @@ pub struct RpmConfig {
 
     /// Extra files (taken from the `.rpm` directory) to include in the RPM
     pub files: Option<BTreeMap<String, FileConfig>>,
+
+    /// Target architecture passed to `rpmbuild`
+    pub target_architecture: Option<String>,
 }
 
 /// Options for creating the release artifact
