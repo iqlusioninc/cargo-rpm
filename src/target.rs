@@ -40,20 +40,43 @@ impl TargetType {
             let mut bins = vec![];
 
             for bin in fs::read_dir(base_path.join("src/bin"))? {
-                let mut bin_str = bin?.path().display().to_string();
+                let bin = bin?;
+                if bin.file_type()?.is_dir() {
+                    // Look for main.rs inside the directory.
+                    let mut path = bin.path();
+                    path.push("main.rs");
+                    if fs::metadata(path).is_err() {
+                        fail!(
+                            ErrorKind::Target,
+                            "main.rs not found inside {}",
+                            bin.path().display()
+                        );
+                    }
+                    let folder_name = match bin.file_name().into_string() {
+                        Ok(s) => s,
+                        Err(_) => fail!(
+                            ErrorKind::Target,
+                            "invalid folder name: {:?}",
+                            bin.path().display()
+                        ),
+                    };
+                    bins.push(folder_name);
+                } else {
+                    let mut bin_str = bin.path().display().to_string();
 
-                if !bin_str.ends_with(".rs") {
-                    fail!(
-                        ErrorKind::Target,
-                        "unrecognized file in src/bin: {:?}",
-                        bin_str
-                    );
+                    if !bin_str.ends_with(".rs") {
+                        fail!(
+                            ErrorKind::Target,
+                            "unrecognized file in src/bin: {:?}",
+                            bin_str
+                        );
+                    }
+
+                    // Remove .rs extension
+                    let new_len = bin_str.len() - 3;
+                    bin_str.truncate(new_len);
+                    bins.push(bin_str);
                 }
-
-                // Remove .rs extension
-                let new_len = bin_str.len() - 3;
-                bin_str.truncate(new_len);
-                bins.push(bin_str);
             }
 
             Ok(TargetType::MultiBin(bins))
