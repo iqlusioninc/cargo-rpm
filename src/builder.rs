@@ -100,7 +100,7 @@ impl Builder {
         status_ok!(
             "Finished",
             "{}-{}-{}.rpm: built in {} secs",
-            self.config.name,
+            self.config.rpm_name(),
             version,
             release,
             began_at.elapsed().as_secs()
@@ -153,7 +153,7 @@ impl Builder {
         let (version, _) = self.config.version();
 
         // Build a tarball containing the RPM's contents
-        let archive_file = format!("{}-{}.tar.gz", self.config.name, version);
+        let archive_file = format!("{}-{}.tar.gz", self.config.rpm_name(), version);
         let archive_path = sources_dir.join(&archive_file);
 
         if self.verbose {
@@ -168,7 +168,7 @@ impl Builder {
     /// Render the package's RPM spec file
     fn render_spec(&self) -> Result<(), Error> {
         // Read the spec file from `.rpm`
-        let spec_filename = format!("{}.spec", self.config.name);
+        let spec_filename = format!("{}.spec", self.config.rpm_name());
         let mut spec_src = File::open(self.rpm_config_dir.join(&spec_filename))?;
         let mut spec_template = String::new();
         spec_src.read_to_string(&mut spec_template)?;
@@ -198,7 +198,7 @@ impl Builder {
     /// Run rpmbuild
     fn rpmbuild(&self) -> Result<(), Error> {
         let (version, release) = self.config.version();
-        let rpm_file = format!("{}-{}-{}.rpm", self.config.name, version, release);
+        let rpm_file = format!("{}-{}-{}.rpm", self.config.rpm_name(), version, release);
         let cmd = Rpmbuild::new(self.verbose)?;
 
         status_ok!(
@@ -217,7 +217,7 @@ impl Builder {
         env::set_current_dir(&self.rpmbuild_dir)?;
 
         // Calculate rpmbuild arguments
-        let spec_path = format!("SPECS/{}.spec", self.config.name);
+        let spec_path = format!("SPECS/{}.spec", self.config.rpm_name());
         let topdir_macro = format!("_topdir {}", self.rpmbuild_dir.display());
         let tmppath_macro = format!("_tmppath {}", self.rpmbuild_dir.join("tmp").display());
 
