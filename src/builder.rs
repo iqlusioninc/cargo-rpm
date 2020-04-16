@@ -222,7 +222,19 @@ impl Builder {
         let tmppath_macro = format!("_tmppath {}", self.rpmbuild_dir.join("tmp").display());
 
         // Calculate rpmbuild arguments
-        let args = ["-D", &topdir_macro, "-D", &tmppath_macro, "-ba", &spec_path];
+        let mut args = vec!["-D", &topdir_macro, "-D", &tmppath_macro, "-ba", &spec_path];
+
+        let arch = self
+            .config
+            .metadata
+            .as_ref()
+            .and_then(|metadata| metadata.rpm.as_ref())
+            .and_then(|rpm| rpm.target_architecture.as_ref());
+
+        if let Some(arch) = arch {
+            args.push("--target");
+            args.push(arch);
+        }
 
         if self.verbose {
             status_ok!("Running", "{} {}", cmd.path.display(), &args.join(" "));
