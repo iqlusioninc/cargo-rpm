@@ -118,7 +118,7 @@ impl Archive {
         target_dir: &Path,
     ) -> Result<Self, Error> {
         let (version, _) = config.version();
-        let base_dir = PathBuf::from(format!("{}-{}", config.name, version));
+        let base_dir = PathBuf::from(format!("{}-{}", config.rpm_name(), version));
         let rpm_metadata = config.rpm_metadata().ok_or_else(|| {
             err!(
                 ErrorKind::Config,

@@ -41,6 +41,10 @@ pub struct InitCmd {
     /// Path to the RPM spec template
     #[options(long = "template")]
     pub template: Option<String>,
+
+    /// The package name if it differs from the crate name
+    #[options(long = "package")]
+    pub package: Option<String>,
 }
 
 impl Runnable for InitCmd {
@@ -65,6 +69,13 @@ impl InitCmd {
         // Read Cargo.toml
         let config = app_config();
 
+        // The package name we're going to use is either passed explicitly
+        // or defaults to the cargo crate name.
+        let pkg_name = match &self.package {
+            Some(p) => p.to_owned(),
+            None => config.package().name.to_owned(),
+        };
+
         // Check if `.rpm` already exists
         if rpm_config_dir.exists() {
             if self.force {
@@ -82,7 +93,7 @@ impl InitCmd {
 
         // Check if we're creating a systemd service unit for this crate
         let service_name = if self.service.is_some() || self.systemd {
-            Some(format!("{}.service", config.package().name))
+            Some(format!("{}.service", pkg_name))
         } else {
             None
         };
@@ -101,7 +112,7 @@ impl InitCmd {
                     process::exit(1);
                 }
             }
-            TargetType::Bin => vec![config.package().name.clone()],
+            TargetType::Bin => vec![pkg_name.clone()],
             TargetType::MultiBin(targets) => targets,
         };
 
@@ -114,8 +125,13 @@ impl InitCmd {
         );
 
         // Render `.rpm/<cratename>.spec`
-        let spec_path = rpm_config_dir.join(format!("{}.spec", config.package().name));
-        let spec_params = SpecParams::new(&config.package(), service_name.clone(), use_sbin);
+        let spec_path = rpm_config_dir.join(format!("{}.spec", pkg_name));
+        let spec_params = SpecParams::new(
+            pkg_name.clone(),
+            &config.package(),
+            service_name.clone(),
+            use_sbin,
+        );
         render_spec(&spec_path, &self.template, &spec_params)?;
 
         // (Optional) Render `.rpm/<cratename>.service` (systemd service unit config)
@@ -137,13 +153,13 @@ impl InitCmd {
             }
 
             let bin_dir: PathBuf = if use_sbin { "/usr/sbin" } else { "/usr/bin" }.into();
-            config::append_rpm_metadata(&cargo_toml, &targets, &extra_files, &bin_dir)?;
+            config::append_rpm_metadata(&pkg_name, &cargo_toml, &targets, &extra_files, &bin_dir)?;
         }
 
         status_ok!(
             "Finished",
             "{} configured (type \"cargo rpm build\" to build)",
-            config.package().name
+            pkg_name
         );
 
         Ok(())

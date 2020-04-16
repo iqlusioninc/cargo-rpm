@@ -43,7 +43,12 @@ pub struct SpecParams {
 
 impl SpecParams {
     /// Create a new set of RPM spec template parameters
-    pub fn new(package: &PackageConfig, service: Option<String>, use_sbin: bool) -> Self {
+    pub fn new(
+        pkg_name: String,
+        package: &PackageConfig,
+        service: Option<String>,
+        use_sbin: bool,
+    ) -> Self {
         let rpm_license = license::convert(&package.license).unwrap_or_else(|e| {
             let default_lic = match package.license {
                 CargoLicense::License(ref lic) => lic.to_owned(),
@@ -54,7 +59,7 @@ impl SpecParams {
         });
 
         Self {
-            name: package.name.to_owned(),
+            name: pkg_name,
             summary: package.description.to_owned(),
             license: rpm_license,
             url: package.homepage.to_owned(),
@@ -103,7 +108,7 @@ impl<'a> From<&'a PackageConfig> for ServiceParams {
         Self {
             description: package.description.to_owned(),
             /// TODO: better handling of target binaries and their paths
-            bin_path: PathBuf::from("/usr/sbin").join(&package.name),
+            bin_path: PathBuf::from("/usr/sbin").join(&package.rpm_name()),
         }
     }
 }
