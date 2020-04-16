@@ -41,6 +41,10 @@ pub struct InitCmd {
     /// Path to the RPM spec template
     #[options(long = "template")]
     pub template: Option<String>,
+
+    /// Append the distribution tag to the release
+    #[options(no_short, long = "dist")]
+    pub dist: bool,
 }
 
 impl Runnable for InitCmd {
@@ -115,7 +119,7 @@ impl InitCmd {
 
         // Render `.rpm/<cratename>.spec`
         let spec_path = rpm_config_dir.join(format!("{}.spec", config.package().name));
-        let spec_params = SpecParams::new(&config.package(), service_name.clone(), use_sbin);
+        let spec_params = SpecParams::new(&config.package(), service_name.clone(), use_sbin, self.dist);
         render_spec(&spec_path, &self.template, &spec_params)?;
 
         // (Optional) Render `.rpm/<cratename>.service` (systemd service unit config)

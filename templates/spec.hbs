@@ -5,7 +5,7 @@
 Name: {{ name }}
 Summary: {{ summary }}
 Version: @@VERSION@@
-Release: @@RELEASE@@
+Release: @@RELEASE@@{{#if dist ~}}%{?dist}{{/if ~}}
 {{#if license ~}}
 License: {{ license }}
 {{/if ~}}

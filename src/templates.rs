@@ -39,11 +39,14 @@ pub struct SpecParams {
 
     /// Are we placing targets in sbin instead of bin?
     pub use_sbin: bool,
+
+    /// Append the build distribution to the release tag
+    pub dist: bool,
 }
 
 impl SpecParams {
     /// Create a new set of RPM spec template parameters
-    pub fn new(package: &PackageConfig, service: Option<String>, use_sbin: bool) -> Self {
+    pub fn new(package: &PackageConfig, service: Option<String>, use_sbin: bool, dist: bool) -> Self {
         let rpm_license = license::convert(&package.license).unwrap_or_else(|e| {
             let default_lic = match package.license {
                 CargoLicense::License(ref lic) => lic.to_owned(),
@@ -60,6 +63,7 @@ impl SpecParams {
             url: package.homepage.to_owned(),
             service,
             use_sbin,
+            dist: dist,
         }
     }
 
