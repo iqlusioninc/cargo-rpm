@@ -71,6 +71,15 @@ impl PackageConfig {
         self.metadata.as_ref().and_then(|md| md.rpm.as_ref())
     }
 
+    /// Get the RPM package name. This is either the explicitly set
+    /// `package.metadata.rpm.package` variable or defaults to the
+    /// `package.name` crate name variable.
+    pub fn rpm_name(&self) -> &str {
+        self.rpm_metadata()
+            .and_then(|r| r.package.as_ref())
+            .unwrap_or(&self.name)
+    }
+
     /// Get the version and release for this package
     pub fn version(&self) -> (String, String) {
         let version_split: Vec<&str> = self.version.split('-').collect();
@@ -95,6 +104,9 @@ pub struct PackageMetadata {
 /// Our `[package.metadata.rpm]` extension to `Cargo.toml`
 #[derive(Clone, Debug, Deserialize)]
 pub struct RpmConfig {
+    /// The RPM package name, if different from crate name
+    pub package: Option<String>,
+
     /// Options for creating the release artifact
     pub cargo: Option<CargoFlags>,
 
@@ -139,6 +151,7 @@ pub struct FileConfig {
 
 /// Render `package.metadata.rpm` section to include in Cargo.toml
 pub fn append_rpm_metadata(
+    pkg_name: &str,
     path: &Path,
     targets: &[String],
     extra_files: &[PathBuf],
@@ -149,6 +162,9 @@ pub fn append_rpm_metadata(
     status_ok!("Updating", "{}", path.canonicalize().unwrap().display());
 
     let mut cargo_toml = OpenOptions::new().append(true).open(path)?;
+
+    writeln!(cargo_toml, "\n[package.metadata.rpm]")?;
+    writeln!(cargo_toml, "package = \"{}\"", pkg_name)?;
 
     // Flags to pass to cargo when doing a release
     // TODO: use serde serializer?
