@@ -13,7 +13,7 @@ use std::{
     fs::{self, File, OpenOptions},
     io::{Read, Write},
     path::{Path, PathBuf},
-    process::{self, Command},
+    process::{self, Command, Stdio},
     time::Instant,
 };
 
@@ -115,6 +115,7 @@ impl Builder {
         if !self.no_cargo_build {
             self.cargo_build()?;
         }
+        self.build_hooks()?;
         self.create_archive()?;
         self.render_spec()?;
         self.rpmbuild()?;
@@ -166,6 +167,35 @@ impl Builder {
             process::exit(status.code().unwrap_or(1));
         }
 
+        Ok(())
+    }
+
+    /// Launch commands after `cargo build`  
+    fn build_hooks(&self) -> Result<(), Error> {
+        if let Some(hooks) = self.rpm_metadata().build_hooks.as_ref() {
+            for (command, args) in hooks {
+                status_info!("Launching", "build hook `{}`", command);
+
+                let status = Command::new(command)
+                    .args(args)
+                    .stdin(Stdio::null())
+                    .stdout(if self.verbose {
+                        Stdio::inherit()
+                    } else {
+                        Stdio::null()
+                    })
+                    .stderr(if self.verbose {
+                        Stdio::inherit()
+                    } else {
+                        Stdio::null()
+                    })
+                    .status()?;
+
+                if !status.success() {
+                    process::exit(status.code().unwrap_or(1));
+                }
+            }
+        }
         Ok(())
     }
 
