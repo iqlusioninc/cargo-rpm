@@ -173,10 +173,10 @@ impl Builder {
     /// Launch commands after `cargo build`  
     fn build_hooks(&self) -> Result<(), Error> {
         if let Some(hooks) = self.rpm_metadata().build_hooks.as_ref() {
-            for (command, args) in hooks {
-                status_info!("Launching", "build hook `{}`", command);
+            for (cmd, args) in hooks {
+                status_info!("Launching", "build hook \"{}\"", cmd);
 
-                let status = Command::new(command)
+                let status = Command::new(cmd)
                     .args(args)
                     .stdin(Stdio::null())
                     .stdout(if self.verbose {
@@ -192,6 +192,11 @@ impl Builder {
                     .status()?;
 
                 if !status.success() {
+                    status_err!(
+                        "Failed to launch build hook \"{}\" `{}`",
+                        cmd,
+                        args.join(" ")
+                    );
                     process::exit(status.code().unwrap_or(1));
                 }
             }
