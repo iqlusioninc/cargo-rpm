@@ -98,7 +98,11 @@ impl ArchiveFile {
         header.set_mode(self.mode);
         header.set_cksum();
 
-        builder.append(&header, src_file)?;
+        if src_metadata.is_dir() {
+            builder.append(&header, std::io::empty())?;
+        } else {
+            builder.append(&header, src_file)?;
+        }
         Ok(())
     }
 }
