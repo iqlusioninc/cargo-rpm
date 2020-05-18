@@ -1,5 +1,7 @@
 language: rust
-rust: stable
+rust:
+  - stable
+  - 1.36.0
 os: linux
 cache: cargo
 
