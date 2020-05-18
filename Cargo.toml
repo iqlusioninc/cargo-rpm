@@ -16,7 +16,11 @@ maintenance = { status = "passively-maintained" }
 
 [dependencies]
 abscissa_core = "0.4"
-failure = "0.1"
+failure = "0.1.8"
+
+# This is added to make sure `failure` does not use backtrace v0.3.47.
+backtrace = "=0.3.46"
+
 flate2 = { version = "1", default-features = false, features = ["zlib"] }
 gumdrop = "0.7"
 lazy_static = "1"
