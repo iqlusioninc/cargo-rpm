@@ -11,7 +11,7 @@
 
 ## Requirements
 
-- Rust **1.36**+
+- Rust **1.41**+
 
 ## Installation
 
