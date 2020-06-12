@@ -57,9 +57,9 @@ limitations under the License.
 
 [crate-image]: https://img.shields.io/crates/v/cargo-rpm.svg
 [crate-link]: https://crates.io/crates/cargo-rpm
-[build-image]: https://travis-ci.org/RustRPM/cargo-rpm.svg?branch=master
-[build-link]: https://travis-ci.org/RustRPM/cargo-rpm
-[rustc-image]: https://img.shields.io/badge/rustc-1.36+-blue.svg
+[build-image]: https://github.com/iqlusioninc/cargo-rpm/workflows/rust/badge.svg?branch=develop&event=push
+[build-link]: https://github.com/iqlusioninc/cargo-rpm/actions
+[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
 [safety-image]: https://img.shields.io/badge/unsafe-forbidden-success.svg
 [safety-link]: https://github.com/rust-secure-code/safety-dance/
 [license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
