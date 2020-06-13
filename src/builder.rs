@@ -35,6 +35,9 @@ pub struct Builder {
     /// Are we in verbose mode?
     pub verbose: bool,
 
+    /// Can we assume that the project is already built?
+    pub no_cargo_build: bool,
+
     /// RPM configuration directory (i.e. `.rpm`)
     pub rpm_config_dir: PathBuf,
 
@@ -50,6 +53,7 @@ impl Builder {
     pub fn new(
         config: &PackageConfig,
         verbose: bool,
+        no_cargo_build: bool,
         rpm_config_dir: &Path,
         base_target_dir: &Path,
     ) -> Self {
@@ -80,6 +84,7 @@ impl Builder {
         Self {
             config: config.clone(),
             verbose,
+            no_cargo_build,
             rpm_config_dir: rpm_config_dir.into(),
             target_dir,
             rpmbuild_dir,
@@ -90,7 +95,9 @@ impl Builder {
     pub fn build(&self) -> Result<(), Error> {
         let began_at = Instant::now();
 
-        self.cargo_build()?;
+        if !self.no_cargo_build {
+            self.cargo_build()?;
+        }
         self.create_archive()?;
         self.render_spec()?;
         self.rpmbuild()?;
