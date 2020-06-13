@@ -19,6 +19,10 @@ pub struct BuildCmd {
     #[options(long = "no-cargo-build")]
     pub no_cargo_build: bool,
 
+    /// Rust target for cross-compilation
+    #[options(long = "target")]
+    pub target: Option<String>,
+
     /// Output path for the built rpm (either a file or directory)
     #[options(long = "output")]
     pub output: Option<String>,
@@ -56,6 +60,7 @@ impl Runnable for BuildCmd {
             config.package(),
             self.verbose,
             self.no_cargo_build,
+            self.target.as_ref(),
             output_path_absolute.as_ref(),
             &rpm_config_dir,
             &target_dir,

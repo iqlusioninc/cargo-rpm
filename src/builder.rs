@@ -38,6 +38,9 @@ pub struct Builder {
     /// Can we assume that the project is already built?
     pub no_cargo_build: bool,
 
+    /// Rust target for cross-compilation
+    pub target: Option<String>,
+
     /// Output path for the built rpm (either a file or directory)
     pub output_path: Option<String>,
 
@@ -57,13 +60,14 @@ impl Builder {
         config: &PackageConfig,
         verbose: bool,
         no_cargo_build: bool,
+        target: Option<&String>,
         output_path: Option<&String>,
         rpm_config_dir: &Path,
         base_target_dir: &Path,
     ) -> Self {
         let mut profile = DEFAULT_PROFILE.to_owned();
-        // Default target is empty.
-        let mut target = "".to_owned();
+        let mut config_target = None;
+
         {
             let rpm_metadata = config.rpm_metadata().unwrap_or_else(|| {
                 status_err!("No [package.metadata.rpm] in Cargo.toml!");
@@ -76,19 +80,25 @@ impl Builder {
                 if let Some(ref p) = cargo.profile {
                     profile = p.to_owned();
                 }
-                if let Some(ref t) = cargo.target {
-                    target = t.to_owned();
-                }
+                config_target = cargo.target.as_ref();
             }
         }
 
-        let target_dir = base_target_dir.join(target).join(profile);
+        if target.is_some() && config_target.is_some() {
+            status_warn!("target also specified as part of [package.metadata.rpm.cargo] in Cargo.toml, but ignoring it");
+        }
+        let final_target = target.or(config_target);
+
+        let target_dir = base_target_dir
+            .join(final_target.unwrap_or(&"".to_owned())) // empty default target
+            .join(profile);
         let rpmbuild_dir = target_dir.join("rpmbuild");
 
         Self {
             config: config.clone(),
             verbose,
             no_cargo_build,
+            target: final_target.cloned(),
             output_path: output_path.cloned(),
             rpm_config_dir: rpm_config_dir.into(),
             target_dir,
@@ -130,11 +140,11 @@ impl Builder {
     fn cargo_build(&self) -> Result<(), Error> {
         let mut buildflags = vec![];
 
-        if let Some(ref cargo) = self.rpm_metadata().cargo {
-            if let Some(ref t) = cargo.target {
-                buildflags.push(format!("--target={}", t));
-            }
+        if let Some(ref t) = self.target {
+            buildflags.push(format!("--target={}", t));
+        }
 
+        if let Some(ref cargo) = self.rpm_metadata().cargo {
             if let Some(ref b) = cargo.buildflags {
                 buildflags.append(&mut b.clone());
             }
