@@ -41,6 +41,7 @@ cp -a * %{buildroot}
 rm -rf %{buildroot}
 
 {{#if service ~}}
+%post
 %systemd_post {{service}}
 
 %preun
