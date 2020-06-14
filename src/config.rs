@@ -209,3 +209,32 @@ pub fn append_rpm_metadata(
 
     Ok(())
 }
+
+/// Get rpm target architecture based on the rust target
+pub fn get_target_architecture(target: &str) -> &str {
+    let mut parts = target.split('-');
+    let arch = parts.next().unwrap();
+    let abi = parts.last().unwrap_or("");
+
+    // based on the similar function from cargo-deb:
+    // https://github.com/mmstick/cargo-deb/blob/v1.23.1/src/manifest.rs#L909-L937
+    // with adjustments for valid values that `rpmbuild --target` takes
+    match (arch, abi) {
+        // https://doc.rust-lang.org/std/env/consts/constant.ARCH.html
+        // rustc --print target-list
+        // https://fedoraproject.org/wiki/Architectures
+        // https://github.com/rpm-software-management/rpm/blob/rpm-4.14.3-release/rpmrc.in#L156
+        ("mipsisa32r6", _) => "mipsr6",
+        ("mipsisa32r6el", _) => "mipsr6el",
+        ("mipsisa64r6", _) => "mips64r6",
+        ("mipsisa64r6el", _) => "mips64r6el",
+        ("powerpc", _) => "ppc",
+        ("powerpc64", _) => "ppc64",
+        ("powerpc64le", _) => "ppc64le",
+        ("riscv64gc", _) => "riscv64",
+        ("x86", _) => "i386",
+        (arm, gnueabi) if arm.starts_with("arm") && gnueabi.ends_with("hf") => "armv7hl",
+        (arm, _) if arm.starts_with("arm") => "armv7l",
+        (other_arch, _) => other_arch,
+    }
+}

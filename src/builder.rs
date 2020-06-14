@@ -2,7 +2,7 @@
 
 use crate::{
     archive::Archive,
-    config::{PackageConfig, RpmConfig},
+    config::{self, PackageConfig, RpmConfig},
     error::Error,
     rpmbuild::Rpmbuild,
 };
@@ -280,17 +280,36 @@ impl Builder {
             args.extend(&["-D", &rpmdir_macro, "-D", &build_name_fmt_macro]);
         }
 
-        let arch = self
+        let config_arch = self
             .config
             .metadata
             .as_ref()
             .and_then(|metadata| metadata.rpm.as_ref())
             .and_then(|rpm| rpm.target_architecture.as_ref());
 
-        if let Some(arch) = arch {
-            args.push("--target");
-            args.push(arch);
-        }
+        if let Some(arch) = config_arch {
+            if self.verbose {
+                status_ok!(
+                    "Configuring",
+                    "rpm target architecture (based on [package.metadata.rpm] from Cargo.toml): {}",
+                    arch
+                );
+            }
+            args.extend(&["--target", arch]);
+        } else if let Some(arch) = self
+            .target
+            .as_ref()
+            .map(|t| config::get_target_architecture(t))
+        {
+            if self.verbose {
+                status_ok!(
+                    "Configuring",
+                    "rpm target architecture (based on specified rust target): {}",
+                    arch
+                );
+            }
+            args.extend(&["--target", arch]);
+        };
 
         if self.verbose {
             status_ok!("Running", "{} {}", cmd.path.display(), &args.join(" "));
