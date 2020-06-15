@@ -217,20 +217,23 @@ impl Builder {
         Ok(())
     }
 
-    /// Interpret the output path string as rpm dir and filename pair, when it's present
+    /// Interpret the output path string as rpm (dir, filename) pair, when it's present
     fn get_rpm_dir_and_filename(&self) -> Option<(&str, &str)> {
         self.output_path.as_ref().map(|path_string| {
             let path_str = path_string.as_str();
 
             if path_str.ends_with('/') || Path::new(path_str).is_dir() {
+                // filename as a rpm macro string, for use by rpmbuild.
+                // based on default %{_build_name_fmt} (stripping off the %{ARCH}/ subfolder)
                 (path_str, "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm")
             } else {
                 let path_str_parts: Vec<&str> = path_str.rsplitn(2, '/').collect();
 
                 let filename = path_str_parts[0];
-                let dir = if path_str_parts[1].is_empty() {
-                    // means path_str was something like "/packagename.rpm" so need to add '/'
-                    "/"
+                let dir = if path_str_parts.len() == 1 {
+                    "." // current dir. example path_str: packagename.rpm
+                } else if path_str_parts[1].is_empty() {
+                    "/" // root dir. example path_str: /packagename.rpm
                 } else {
                     path_str_parts[1]
                 };

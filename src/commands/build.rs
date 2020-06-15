@@ -6,7 +6,7 @@ use crate::{
     target,
 };
 use abscissa_core::{Command, Runnable};
-use std::{path::PathBuf, process};
+use std::{env, path::PathBuf, process};
 
 /// The `cargo rpm build` subcommand
 #[derive(Command, Debug, Default, Options)]
@@ -48,10 +48,12 @@ impl Runnable for BuildCmd {
         // and if we don't do this, rpmbuild would put the rpm relative to
         // %{_topdir}, when relative paths are specified here).
         let output_path_absolute = self.output.as_ref().map(|path_string| {
-            let mut p = std::env::current_dir().unwrap_or_else(|err| {
-                status_err!("{}: {}", err, path_string);
+            let mut p = env::current_dir().unwrap_or_else(|err| {
+                status_err!("{}", err);
                 process::exit(1);
             });
+            // If path_string is already absolute, p becomes that. Otherwise
+            // current dir is prepended to the path_string.
             p.push(path_string);
             p.display().to_string()
         });
