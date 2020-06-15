@@ -18,6 +18,10 @@ pub struct BuildCmd {
     /// Assume that the project is already built (disables automatic cargo build)
     #[options(long = "no-cargo-build")]
     pub no_cargo_build: bool,
+
+    /// Output path for the built rpm (either a file or directory)
+    #[options(long = "output")]
+    pub output: Option<String>,
 }
 
 impl Runnable for BuildCmd {
@@ -34,10 +38,25 @@ impl Runnable for BuildCmd {
             process::exit(1);
         });
 
+        // Convert the specified output path string to an absolute path. This
+        // ensures that when relative paths are specified as cargo rpm output,
+        // rpmbuild respects it (this path ultimately gets passed to rpmbuild
+        // and if we don't do this, rpmbuild would put the rpm relative to
+        // %{_topdir}, when relative paths are specified here).
+        let output_path_absolute = self.output.as_ref().map(|path_string| {
+            let mut p = std::env::current_dir().unwrap_or_else(|err| {
+                status_err!("{}: {}", err, path_string);
+                process::exit(1);
+            });
+            p.push(path_string);
+            p.display().to_string()
+        });
+
         Builder::new(
             config.package(),
             self.verbose,
             self.no_cargo_build,
+            output_path_absolute.as_ref(),
             &rpm_config_dir,
             &target_dir,
         )

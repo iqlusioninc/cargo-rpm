@@ -38,6 +38,9 @@ pub struct Builder {
     /// Can we assume that the project is already built?
     pub no_cargo_build: bool,
 
+    /// Output path for the built rpm (either a file or directory)
+    pub output_path: Option<String>,
+
     /// RPM configuration directory (i.e. `.rpm`)
     pub rpm_config_dir: PathBuf,
 
@@ -54,6 +57,7 @@ impl Builder {
         config: &PackageConfig,
         verbose: bool,
         no_cargo_build: bool,
+        output_path: Option<&String>,
         rpm_config_dir: &Path,
         base_target_dir: &Path,
     ) -> Self {
@@ -85,6 +89,7 @@ impl Builder {
             config: config.clone(),
             verbose,
             no_cargo_build,
+            output_path: output_path.cloned(),
             rpm_config_dir: rpm_config_dir.into(),
             target_dir,
             rpmbuild_dir,
@@ -202,6 +207,29 @@ impl Builder {
         Ok(())
     }
 
+    /// Interpret the output path string as rpm dir and filename pair, when it's present
+    fn get_rpm_dir_and_filename(&self) -> Option<(&str, &str)> {
+        self.output_path.as_ref().map(|path_string| {
+            let path_str = path_string.as_str();
+
+            if path_str.ends_with('/') || Path::new(path_str).is_dir() {
+                (path_str, "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm")
+            } else {
+                let path_str_parts: Vec<&str> = path_str.rsplitn(2, '/').collect();
+
+                let filename = path_str_parts[0];
+                let dir = if path_str_parts[1].is_empty() {
+                    // means path_str was something like "/packagename.rpm" so need to add '/'
+                    "/"
+                } else {
+                    path_str_parts[1]
+                };
+
+                (dir, filename)
+            }
+        })
+    }
+
     /// Run rpmbuild
     fn rpmbuild(&self) -> Result<(), Error> {
         let (version, release) = self.config.version();
@@ -229,7 +257,18 @@ impl Builder {
         let tmppath_macro = format!("_tmppath {}", self.rpmbuild_dir.join("tmp").display());
 
         // Calculate rpmbuild arguments
-        let mut args = vec!["-D", &topdir_macro, "-D", &tmppath_macro, "-ba", &spec_path];
+        let mut args = vec!["-ba", &spec_path, "-D", &topdir_macro, "-D", &tmppath_macro];
+
+        // By default, final rpm output path is:
+        // %{_topdir}/RPMS/%{ARCH}/%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm
+        // Change it when the output path is specified.
+        let mut rpmdir_macro = "_rpmdir ".to_owned();
+        let mut build_name_fmt_macro = "_build_name_fmt ".to_owned();
+        if let Some((dir, filename)) = self.get_rpm_dir_and_filename() {
+            rpmdir_macro.push_str(dir);
+            build_name_fmt_macro.push_str(filename);
+            args.extend(&["-D", &rpmdir_macro, "-D", &build_name_fmt_macro]);
+        }
 
         let arch = self
             .config
