@@ -2,9 +2,10 @@
 
 use crate::{
     archive::Archive,
-    config::{self, PackageConfig, RpmConfig},
+    config::{PackageConfig, RpmConfig},
     error::Error,
     rpmbuild::Rpmbuild,
+    target_architecture::TargetArch,
 };
 use std::{
     env,
@@ -283,14 +284,16 @@ impl Builder {
             args.extend(&["-D", &rpmdir_macro, "-D", &build_name_fmt_macro]);
         }
 
-        let config_arch = self
+        // Set the rpm target architecture
+        let mut arch = "".to_owned();
+        if let Some(config_arch) = self
             .config
             .metadata
             .as_ref()
             .and_then(|metadata| metadata.rpm.as_ref())
-            .and_then(|rpm| rpm.target_architecture.as_ref());
-
-        if let Some(arch) = config_arch {
+            .and_then(|rpm| rpm.target_architecture.as_ref())
+        {
+            arch = config_arch.to_owned();
             if self.verbose {
                 status_ok!(
                     "Configuring",
@@ -298,12 +301,10 @@ impl Builder {
                     arch
                 );
             }
-            args.extend(&["--target", arch]);
-        } else if let Some(arch) = self
-            .target
-            .as_ref()
-            .map(|t| config::get_target_architecture(t))
-        {
+        } else if let Some(target) = self.target.as_ref() {
+            arch = TargetArch::parse(target)?
+                .as_rpm_target_architecture()
+                .to_owned();
             if self.verbose {
                 status_ok!(
                     "Configuring",
@@ -311,8 +312,10 @@ impl Builder {
                     arch
                 );
             }
-            args.extend(&["--target", arch]);
         };
+        if !arch.is_empty() {
+            args.extend(&["--target", &arch]);
+        }
 
         if self.verbose {
             status_ok!("Running", "{} {}", cmd.path.display(), &args.join(" "));
