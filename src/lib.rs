@@ -17,4 +17,5 @@ pub mod license;
 mod prelude;
 pub mod rpmbuild;
 pub mod target;
+pub mod target_architecture;
 pub mod templates;
