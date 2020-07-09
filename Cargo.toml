@@ -18,7 +18,7 @@ maintenance = { status = "passively-maintained" }
 abscissa_core = "0.5"
 flate2 = { version = "1", default-features = false, features = ["zlib"] }
 gumdrop = "0.7"
-handlebars = "2"
+handlebars = "3"
 serde = { version = "1", features = ["serde_derive"] }
 tar = "0.4"
 thiserror = "1"
