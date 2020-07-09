@@ -22,7 +22,7 @@ handlebars = "2"
 serde = { version = "1", features = ["serde_derive"] }
 tar = "0.4"
 thiserror = "1"
-cargo_metadata = "0.9"
+cargo_metadata = "0.10"
 
 [dev_dependencies]
 abscissa_core = { version = "0.5", features = ["testing"] }
