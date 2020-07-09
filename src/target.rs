@@ -16,11 +16,10 @@ pub fn find_dir() -> Result<PathBuf, Error> {
         return Ok(PathBuf::from(p));
     }
 
-    let mut cmd = cargo_metadata::MetadataCommand::new();
-    match cmd.exec() {
-        Ok(metadata) => Ok(metadata.target_directory),
-        Err(_) => fail!(ErrorKind::Target, "couldn't find target directory!"),
-    }
+    cargo_metadata::MetadataCommand::new()
+        .exec()
+        .map(|metadata| metadata.target_directory)
+        .map_err(|_| format_err!(ErrorKind::Target, "couldn't find target directory!").into())
 }
 
 /// Target types we can autodetect
