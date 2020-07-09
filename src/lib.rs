@@ -2,7 +2,7 @@
 
 #![deny(warnings, missing_docs, trivial_casts, unused_qualifications)]
 #![forbid(unsafe_code)]
-#![doc(html_root_url = "https://docs.rs/cargo-rpm/0.6.0")]
+#![doc(html_root_url = "https://docs.rs/cargo-rpm/0.8.0")]
 
 pub mod application;
 pub mod archive;

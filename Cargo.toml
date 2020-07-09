@@ -1,18 +1,14 @@
 [package]
 name        = "cargo-rpm"
 description = "Build RPMs from Rust projects using Cargo workflows"
-version     = "0.7.0" # Also update html_root_url in lib.rs when bumping this
+version     = "0.8.0" # Also update html_root_url in lib.rs when bumping this
 authors     = ["Tony Arcieri <tony@iqlusion.io>"]
 license     = "Apache-2.0"
 readme      = "README.md"
 edition     = "2018"
 categories  = ["command-line-utilities", "development-tools"]
 keywords    = ["rpm", "cargo", "package", "release"]
-homepage    = "https://github.com/rustrpm/cargo-rpm/"
-
-[badges]
-travis-ci = { repository = "rustrpm/cargo-rpm" }
-maintenance = { status = "passively-maintained" }
+repository  = "https://github.com/iqlusioninc/cargo-rpm"
 
 [dependencies]
 abscissa_core = "0.5"
