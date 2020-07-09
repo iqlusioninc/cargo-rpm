@@ -4,9 +4,6 @@
 #![forbid(unsafe_code)]
 #![doc(html_root_url = "https://docs.rs/cargo-rpm/0.6.0")]
 
-#[macro_use]
-extern crate abscissa_core;
-
 pub mod application;
 pub mod archive;
 pub mod builder;

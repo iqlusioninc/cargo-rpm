@@ -3,7 +3,10 @@
 //! Arguably we should be building a cpio archive instead of a tarball, but
 //! Rust support for tar is presently (as of writing) better.
 
-use crate::error::{Error, ErrorKind};
+use crate::{
+    error::{Error, ErrorKind},
+    prelude::*,
+};
 use flate2::{write::GzEncoder, Compression};
 use std::{
     fs::{File, OpenOptions},
@@ -124,7 +127,7 @@ impl Archive {
         let (version, _) = config.version();
         let base_dir = PathBuf::from(format!("{}-{}", config.rpm_name(), version));
         let rpm_metadata = config.rpm_metadata().ok_or_else(|| {
-            err!(
+            format_err!(
                 ErrorKind::Config,
                 "no [package.metadata.rpm] in Cargo.toml!"
             )

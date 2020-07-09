@@ -9,6 +9,7 @@ use crate::{
     templates::{ServiceParams, SpecParams},
 };
 use abscissa_core::Command;
+use gumdrop::Options;
 use std::{
     fs::{self, File, OpenOptions},
     io::Write,

@@ -1,6 +1,9 @@
 //! Target-type autodetection for crates
 
-use crate::error::{Error, ErrorKind};
+use crate::{
+    error::{Error, ErrorKind},
+    prelude::*,
+};
 use std::{
     env, fs,
     path::{Path, PathBuf},
