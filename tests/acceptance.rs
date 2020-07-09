@@ -8,17 +8,9 @@
 #![forbid(unsafe_code)]
 
 use abscissa_core::testing::prelude::*;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
-lazy_static! {
-    /// Executes target binary via `cargo run`.
-    ///
-    /// Storing this value in a `lazy_static!` ensures that all instances of
-    /// the runner acquire a mutex when executing commands and inspecting
-    /// exit statuses, serializing what would otherwise be multithreaded
-    /// invocations as `cargo test` executes tests in parallel by default.
-    pub static ref RUNNER: CmdRunner = CmdRunner::default();
-}
+pub static RUNNER: Lazy<CmdRunner> = Lazy::new(|| CmdRunner::default());
 
 /// Test the `cargo rpm version` subcommand
 #[test]

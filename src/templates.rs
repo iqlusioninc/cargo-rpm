@@ -4,6 +4,7 @@ use crate::{
     config::{CargoLicense, PackageConfig},
     error::{Error, ErrorKind},
     license,
+    prelude::*,
 };
 use handlebars::Handlebars;
 use serde::Serialize;
@@ -132,5 +133,5 @@ fn render_template<T: Serialize>(name: &str, template: &str, data: &T) -> Result
     handlebars.register_template_string(name, template).unwrap();
     Ok(handlebars
         .render(name, data)
-        .map_err(|e| err!(ErrorKind::Template, "Error rendering template: {}", e))?)
+        .map_err(|e| format_err!(ErrorKind::Template, "Error rendering template: {}", e))?)
 }

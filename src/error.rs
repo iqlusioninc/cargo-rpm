@@ -1,51 +1,67 @@
 //! Error types
 
-use abscissa_core::err;
-use failure::Fail;
-use std::{fmt, io, num, path, time};
-
-/// Error type
-#[derive(Debug)]
-pub struct Error(abscissa_core::Error<ErrorKind>);
+use crate::prelude::*;
+use abscissa_core::error::{BoxError, Context};
+use std::{fmt, io, num, ops::Deref, path, time};
+use thiserror::Error;
 
 /// Kinds of errors
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Fail)]
+#[derive(Copy, Clone, Eq, Error, PartialEq, Debug)]
 pub enum ErrorKind {
     /// Error in `Cargo.toml`
-    #[fail(display = "config error")]
+    #[error("config error")]
     Config,
 
     /// Errors related to dates/times
-    #[fail(display = "date/time error")]
+    #[error("date/time error")]
     Date,
 
     /// License type errors
-    #[fail(display = "license error")]
+    #[error("license error")]
     License,
 
     /// Input/output error
-    #[fail(display = "I/O error")]
+    #[error("I/O error")]
     Io,
 
     /// Errors parsing data
-    #[fail(display = "parse error")]
+    #[error("parse error")]
     Parse,
 
     /// Errors relating to file paths
-    #[fail(display = "path error")]
+    #[error("path error")]
     Path,
 
     /// Errors invoking the `rpmbuild` utility
-    #[fail(display = "rpmbuild error")]
+    #[error("rpmbuild error")]
     Rpmbuild,
 
     /// Errors involving the target binary
-    #[fail(display = "target error")]
+    #[error("target error")]
     Target,
 
     /// Errors related to template files (for RPM specs, systemd service units, etc)
-    #[fail(display = "template error")]
+    #[error("template error")]
     Template,
+}
+
+impl ErrorKind {
+    /// Create an error context from this error
+    pub fn context(self, source: impl Into<BoxError>) -> Context<ErrorKind> {
+        Context::new(self, Some(source.into()))
+    }
+}
+
+/// Error type
+#[derive(Debug)]
+pub struct Error(Box<Context<ErrorKind>>);
+
+impl Deref for Error {
+    type Target = Context<ErrorKind>;
+
+    fn deref(&self) -> &Context<ErrorKind> {
+        &self.0
+    }
 }
 
 impl fmt::Display for Error {
@@ -54,32 +70,44 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<abscissa_core::Error<ErrorKind>> for Error {
-    fn from(other: abscissa_core::Error<ErrorKind>) -> Self {
-        Error(other)
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        self.0.source()
+    }
+}
+
+impl From<ErrorKind> for Error {
+    fn from(kind: ErrorKind) -> Self {
+        Context::new(kind, None).into()
+    }
+}
+
+impl From<Context<ErrorKind>> for Error {
+    fn from(context: Context<ErrorKind>) -> Self {
+        Error(Box::new(context))
     }
 }
 
 impl From<io::Error> for Error {
     fn from(other: io::Error) -> Self {
-        err!(ErrorKind::Io, other).into()
+        format_err!(ErrorKind::Io, other).into()
     }
 }
 
 impl From<num::ParseIntError> for Error {
     fn from(other: num::ParseIntError) -> Self {
-        err!(ErrorKind::Parse, other).into()
+        format_err!(ErrorKind::Parse, other).into()
     }
 }
 
 impl From<path::StripPrefixError> for Error {
     fn from(other: path::StripPrefixError) -> Self {
-        err!(ErrorKind::Path, other).into()
+        format_err!(ErrorKind::Path, other).into()
     }
 }
 
 impl From<time::SystemTimeError> for Error {
     fn from(other: time::SystemTimeError) -> Self {
-        err!(ErrorKind::Date, other).into()
+        format_err!(ErrorKind::Date, other).into()
     }
 }

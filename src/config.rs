@@ -1,7 +1,6 @@
 //! `Cargo.toml` parser specialized for the `cargo rpm` use case
 
-use crate::error::Error;
-use abscissa_core::Config;
+use crate::{error::Error, prelude::*};
 use serde::Deserialize;
 use std::{
     collections::BTreeMap,
@@ -15,7 +14,7 @@ use std::{
 pub const CARGO_CONFIG_FILE: &str = "Cargo.toml";
 
 /// The parts of `Cargo.toml` that `cargo rpm` cares about
-#[derive(Config, Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 pub struct CargoConfig {
     /// Cargo package configuration
     package: Option<PackageConfig>,

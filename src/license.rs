@@ -9,6 +9,7 @@
 use crate::{
     config::CargoLicense,
     error::{Error, ErrorKind},
+    prelude::*,
 };
 use std::fs;
 
@@ -45,7 +46,7 @@ pub fn convert(license: &CargoLicense) -> Result<String, Error> {
             let license_string = license_string
                 .lines()
                 .next()
-                .ok_or_else(|| err!(ErrorKind::License, "empty license file {}!", path))?
+                .ok_or_else(|| format_err!(ErrorKind::License, "empty license file {}!", path))?
                 .to_owned();
 
             Ok(license_string)

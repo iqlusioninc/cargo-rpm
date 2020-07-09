@@ -4,6 +4,7 @@ use crate::{
     archive::Archive,
     config::{PackageConfig, RpmConfig},
     error::Error,
+    prelude::*,
     rpmbuild::Rpmbuild,
     target_architecture::TargetArch,
 };

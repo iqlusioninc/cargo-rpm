@@ -1,6 +1,9 @@
 //! Wrapper for running the `rpmbuild` command
 
-use crate::error::{Error, ErrorKind};
+use crate::{
+    error::{Error, ErrorKind},
+    prelude::*,
+};
 use std::{
     ffi::OsStr,
     io::{BufRead, BufReader},
@@ -42,7 +45,7 @@ impl Rpmbuild {
             .args(&["--version"])
             .output()
             .map_err(|e| {
-                err!(
+                format_err!(
                     ErrorKind::Rpmbuild,
                     "error running {}: {}",
                     self.path.display(),
@@ -60,7 +63,7 @@ impl Rpmbuild {
         }
 
         let vers = String::from_utf8(output.stdout).map_err(|e| {
-            err!(
+            format_err!(
                 ErrorKind::Rpmbuild,
                 "error parsing rpmbuild output as UTF-8: {}",
                 e
@@ -95,7 +98,7 @@ impl Rpmbuild {
             })
             .spawn()
             .map_err(|e| {
-                err!(
+                format_err!(
                     ErrorKind::Rpmbuild,
                     "error running {}: {}",
                     self.path.display(),

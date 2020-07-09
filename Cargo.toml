@@ -15,19 +15,18 @@ travis-ci = { repository = "rustrpm/cargo-rpm" }
 maintenance = { status = "passively-maintained" }
 
 [dependencies]
-abscissa_core = "0.4"
-failure = "0.1"
+abscissa_core = "0.5"
 flate2 = { version = "1", default-features = false, features = ["zlib"] }
 gumdrop = "0.7"
-lazy_static = "1"
 handlebars = "2"
 serde = { version = "1", features = ["serde_derive"] }
 tar = "0.4"
+thiserror = "1"
 cargo_metadata = "0.9"
 
-[dev-dependencies.abscissa_core]
-version = "0.4"
-features = ["testing"]
+[dev_dependencies]
+abscissa_core = { version = "0.5", features = ["testing"] }
+once_cell = "1"
 
 [package.metadata.rpm]
 cargo = { buildflags = ["--release"] }

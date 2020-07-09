@@ -6,6 +6,7 @@ use crate::{
     target,
 };
 use abscissa_core::{Command, Runnable};
+use gumdrop::Options;
 use std::{env, path::PathBuf, process};
 
 /// The `cargo rpm build` subcommand

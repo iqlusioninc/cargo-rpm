@@ -4,7 +4,10 @@
 
 #![allow(non_camel_case_types)]
 
-use crate::error::{Error, ErrorKind};
+use crate::{
+    error::{Error, ErrorKind},
+    prelude::*,
+};
 
 /// Target architectures for which we have a defined rpm target architecture.
 /// Only the architectures that vary in name between the rust and rpm target
@@ -53,7 +56,7 @@ impl TargetArch {
     pub fn parse(rust_target_triple: &str) -> Result<Self, Error> {
         let mut parts = rust_target_triple.split('-');
         let arch = parts.next().ok_or_else(|| {
-            err!(
+            format_err!(
                 ErrorKind::Parse,
                 "no arch in the rust target {}!",
                 rust_target_triple

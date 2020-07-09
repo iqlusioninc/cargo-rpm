@@ -2,14 +2,12 @@
 
 use crate::{commands::CargoRpmCmd, config::CargoConfig};
 use abscissa_core::{
-    application, config, logging, Application, EntryPoint, FrameworkError, StandardPaths,
+    application::{self, AppCell},
+    config, trace, Application, EntryPoint, FrameworkError, StandardPaths,
 };
-use lazy_static::lazy_static;
 
-lazy_static! {
-    /// Application state
-    pub static ref APPLICATION: application::Lock<CargoRpmApp> = application::Lock::default();
-}
+/// Application state
+pub static APPLICATION: AppCell<CargoRpmApp> = AppCell::new();
 
 /// Obtain a read-only (multi-reader) lock on the application state.
 ///
@@ -92,12 +90,12 @@ impl Application for CargoRpmApp {
         Ok(())
     }
 
-    /// Get logging configuration from command-line options
-    fn logging_config(&self, command: &EntryPoint<CargoRpmCmd>) -> logging::Config {
+    /// Get tracing configuration from command-line options
+    fn tracing_config(&self, command: &Self::Cmd) -> trace::Config {
         if command.verbose {
-            logging::Config::verbose()
+            trace::Config::verbose()
         } else {
-            logging::Config::default()
+            trace::Config::default()
         }
     }
 }
