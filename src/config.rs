@@ -115,6 +115,9 @@ pub struct RpmConfig {
     /// Extra files (taken from the `.rpm` directory) to include in the RPM
     pub files: Option<BTreeMap<String, FileConfig>>,
 
+    /// Extra commands to launch after building
+    pub build_hooks: Option<BTreeMap<String, Vec<String>>>,
+
     /// Target architecture passed to `rpmbuild`
     pub target_architecture: Option<String>,
 }
