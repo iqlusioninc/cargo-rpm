@@ -19,7 +19,7 @@ pub fn find_dir() -> Result<PathBuf, Error> {
     cargo_metadata::MetadataCommand::new()
         .exec()
         .map(|metadata| metadata.target_directory)
-        .map_err(|_| format_err!(ErrorKind::Target, "couldn't find target directory!").into())
+        .map_err(|err| format_err!(ErrorKind::Target, "failed to fetch metadata: {}", err).into())
 }
 
 /// Target types we can autodetect
