@@ -172,7 +172,7 @@ impl Builder {
 
     /// Launch commands after `cargo build`  
     fn build_hooks(&self) -> Result<(), Error> {
-        if let Some(hooks) = self.rpm_metadata().build_hooks.as_ref() {
+        for hooks in &self.rpm_metadata().build_hooks {
             for (cmd, args) in hooks {
                 status_info!("Launching", "build hook \"{}\"", cmd);
 

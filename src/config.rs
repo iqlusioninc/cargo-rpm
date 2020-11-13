@@ -116,7 +116,8 @@ pub struct RpmConfig {
     pub files: Option<BTreeMap<String, FileConfig>>,
 
     /// Extra commands to launch after building
-    pub build_hooks: Option<BTreeMap<String, Vec<String>>>,
+    #[serde(default = "Vec::new")]
+    pub build_hooks: Vec<BTreeMap<String, Vec<String>>>,
 
     /// Target architecture passed to `rpmbuild`
     pub target_architecture: Option<String>,
