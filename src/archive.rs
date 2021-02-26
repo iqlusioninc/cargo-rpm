@@ -85,7 +85,6 @@ impl ArchiveFile {
     /// Append this file to the given archive builder
     pub fn append_to(&self, builder: &mut Builder<GzEncoder<File>>) -> Result<(), Error> {
         let mut header = Header::new_gnu();
-        header.set_path(&self.archive_path)?;
 
         let src_file = File::open(&self.src_path)?;
         let src_metadata = src_file.metadata()?;
@@ -102,9 +101,9 @@ impl ArchiveFile {
         header.set_cksum();
 
         if src_metadata.is_dir() {
-            builder.append(&header, std::io::empty())?;
+            builder.append_data(&mut header, &self.archive_path, std::io::empty())?;
         } else {
-            builder.append(&header, src_file)?;
+            builder.append_data(&mut header, &self.archive_path, src_file)?;
         }
         Ok(())
     }
