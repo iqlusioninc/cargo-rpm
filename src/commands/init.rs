@@ -11,6 +11,7 @@ use crate::{
 use abscissa_core::Command;
 use gumdrop::Options;
 use std::{
+    env,
     fs::{self, File, OpenOptions},
     io::Write,
     path::{Path, PathBuf},
@@ -46,6 +47,10 @@ pub struct InitCmd {
     /// The package name if it differs from the crate name
     #[options(long = "package")]
     pub package: Option<String>,
+
+    /// Where should the generated spec file be saved, defaults to `.rpm`
+    #[options(long = "output")]
+    pub output: Option<String>,
 }
 
 impl Runnable for InitCmd {
@@ -65,7 +70,17 @@ impl InitCmd {
         // Calculate paths relative to the current directory
         let crate_root = PathBuf::from(".");
         let cargo_toml = crate_root.join(CARGO_CONFIG_FILE);
-        let rpm_config_dir = crate_root.join(RPM_CONFIG_DIR);
+
+        // Get config dir from output argument or default
+        let rpm_config_dir = if let Some(output) = &self.output {
+            let current_dir = env::current_dir().unwrap_or_else(|err| {
+                status_err!("{}", err);
+                process::exit(1);
+            });
+            current_dir.join(output)
+        } else {
+            crate_root.join(RPM_CONFIG_DIR)
+        };
 
         // Read Cargo.toml
         let config = app_config();

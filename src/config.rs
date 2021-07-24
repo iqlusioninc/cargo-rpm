@@ -106,13 +106,19 @@ pub struct RpmConfig {
     /// The RPM package name, if different from crate name
     pub package: Option<String>,
 
+    /// Config directory, defaults to `.rpm`
+    pub config: Option<String>,
+
+    /// Output directory or file, defaults to `target/release/rpmbuild/RPMs`
+    pub output: Option<String>,
+
     /// Options for creating the release artifact
     pub cargo: Option<CargoFlags>,
 
     /// Target configuration: a map of target binaries to their file config
     pub targets: BTreeMap<String, FileConfig>,
 
-    /// Extra files (taken from the `.rpm` directory) to include in the RPM
+    /// Extra files (taken from the config directory) to include in the RPM
     pub files: Option<BTreeMap<String, FileConfig>>,
 
     /// Extra commands to launch after building

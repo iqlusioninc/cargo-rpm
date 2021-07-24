@@ -26,6 +26,11 @@ This will create a `.rpm/YOURCRATENAME.spec` file which is passed to the
 it may need some customization if the resulting RPM has dependencies or
 files other than target binaries.
 
+You can also specify the `--output` argument to save the `.spec` file into
+a different directory. However, you will then also need to add `config` entry
+in the `[package.metadata.rpm]` section of the `Cargo.toml` file pointing to
+that directory, or run `build` command with `--config` argument.
+
 For more information on spec files, see:
 <http://ftp.rpm.org/max-rpm/s1-rpm-build-creating-spec-file.html>
 
@@ -37,7 +42,20 @@ targets for your project and package them into an RPM.
 If you encounter errors, you may need to see more information about why
 `rpmbuild` failed. Run `cargo rpm build -v` to enable verbose mode.
 
-Finished `.rpm` files will be placed in `target/release/rpmbuild/RPMs/<arch>`
+Finished `.rpm` files will be placed in `target/release/rpmbuild/RPMs/<arch>`.
+
+You can also specify the `--output` argument (or add the `output` entry in `Cargo.lock`)
+to change the location of `.rpm` file. It can either be a file or a directory:
+
+*  If the arg value ends in a `/` (or if it is already an existent directory), the value
+   is treated as a directory path and rpm is created inside it with the default naming
+   scheme (`<name>-<version>-<release>.<arch>.rpm`).
+* For other arg values, the value is treated as a file path (the default naming scheme
+  _won't_ be followed in this case).
+* Both relative and absolute paths work as input (relative paths will be normalized to
+  be absolute when passing over to `rpmbuild`).
+* Parent directories in the path are auto-created, if not present (this is handled by
+  `rpmbuild`).
 
 ## License
 
