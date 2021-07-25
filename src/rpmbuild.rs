@@ -79,7 +79,7 @@ impl Rpmbuild {
         }
 
         let parts: Vec<&str> = vers.split_whitespace().collect();
-        Ok(parts[2].to_owned())
+        Ok(parts[parts.len() - 1].to_owned())
     }
 
     /// Execute `rpmbuild` with the given arguments
