@@ -54,10 +54,15 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
+{{#if bin ~}}
 {{#if use_sbin ~}}
 %{_sbindir}/*
 {{else ~}}
 %{_bindir}/*
+{{/if ~}}
+{{/if ~}}
+{{#if lib ~}}
+%{_libdir}/*
 {{/if ~}}
 {{#if service ~}}
 %{_unitdir}/{{service}}

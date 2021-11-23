@@ -5,6 +5,7 @@ use crate::{
     error::{Error, ErrorKind},
     license,
     prelude::*,
+    target::Target,
 };
 use handlebars::Handlebars;
 use serde::Serialize;
@@ -38,7 +39,13 @@ pub struct SpecParams {
     /// Name of a systemd service unit (if enabled)
     pub service: Option<String>,
 
-    /// Are we placing targets in sbin instead of bin?
+    /// Are we creating any binary executables?
+    pub bin: bool,
+
+    /// Are we creating any libraries?
+    pub lib: bool,
+
+    /// Are we placing executables in sbin instead of bin?
     pub use_sbin: bool,
 }
 
@@ -49,6 +56,7 @@ impl SpecParams {
         package: &PackageConfig,
         service: Option<String>,
         use_sbin: bool,
+        targets: &[Target],
     ) -> Self {
         let rpm_license = license::convert(&package.license).unwrap_or_else(|e| {
             let default_lic = match package.license {
@@ -66,6 +74,12 @@ impl SpecParams {
             url: package.homepage.to_owned(),
             service,
             use_sbin,
+            bin: targets
+                .iter()
+                .any(|target| matches!(target, Target::Bin(_))),
+            lib: targets
+                .iter()
+                .any(|target| matches!(target, Target::Cdylib(_))),
         }
     }
 

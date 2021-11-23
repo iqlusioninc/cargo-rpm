@@ -1,11 +1,13 @@
 //! Target-type autodetection for crates
 
+use cargo_metadata::MetadataCommand;
+
 use crate::{
     error::{Error, ErrorKind},
     prelude::*,
 };
 use std::{
-    env, fs,
+    env,
     path::{Path, PathBuf},
 };
 
@@ -18,56 +20,40 @@ pub fn find_dir() -> Result<PathBuf, Error> {
 
     cargo_metadata::MetadataCommand::new()
         .exec()
-        .map(|metadata| metadata.target_directory)
+        .map(|metadata| metadata.target_directory.into())
         .map_err(|err| format_err!(ErrorKind::Target, "failed to fetch metadata: {}", err).into())
 }
 
-/// Target types we can autodetect
-pub enum TargetType {
-    /// Library crate i.e. `lib.rs` (we don't support these yet)
-    Lib,
+/// Targets we can autodetect
+#[derive(PartialEq, Eq)]
+pub enum Target {
+    /// A shared object library
+    Cdylib(String),
 
-    /// Binary crate with a single executable i.e. `main.rs`
-    Bin,
-
-    /// Crate with multiple binary targets i.e. `src/bin/*.rs`
-    /// (we don't support these yet)
-    MultiBin(Vec<String>),
+    /// A binary executable
+    Bin(String),
 }
 
-impl TargetType {
+impl Target {
     /// Autodetect the targets for this crate
-    pub fn detect(base_path: &Path) -> Result<Self, Error> {
-        if base_path.join("src/bin").exists() {
-            let mut bins = vec![];
-
-            for bin in fs::read_dir(base_path.join("src/bin"))? {
-                let mut bin_str = bin?.path().display().to_string();
-
-                if !bin_str.ends_with(".rs") {
-                    fail!(
-                        ErrorKind::Target,
-                        "unrecognized file in src/bin: {:?}",
-                        bin_str
-                    );
+    pub fn detect(base_path: &Path) -> Result<Vec<Self>, Error> {
+        let metadata = MetadataCommand::new()
+            .current_dir(base_path)
+            .no_deps()
+            .exec()
+            .unwrap();
+        Ok(metadata.packages[0]
+            .targets
+            .iter()
+            .filter_map(|target| {
+                if target.kind.iter().any(|t| t == "bin") {
+                    Some(Self::Bin(target.name.to_string()))
+                } else if target.kind.iter().any(|t| t == "cdylib") {
+                    Some(Self::Cdylib(target.name.to_string()))
+                } else {
+                    None
                 }
-
-                // Remove .rs extension
-                let new_len = bin_str.len() - 3;
-                bin_str.truncate(new_len);
-                bins.push(bin_str);
-            }
-
-            Ok(TargetType::MultiBin(bins))
-        } else if base_path.join("src/main.rs").exists() {
-            Ok(TargetType::Bin)
-        } else if base_path.join("src/lib.rs").exists() {
-            Ok(TargetType::Lib)
-        } else {
-            fail!(
-                ErrorKind::Target,
-                "couldn't detect crate type (no main.rs or lib.rs?)"
-            );
-        }
+            })
+            .collect())
     }
 }

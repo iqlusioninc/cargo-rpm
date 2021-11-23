@@ -5,7 +5,7 @@ use crate::{
     config::{self, PackageConfig, CARGO_CONFIG_FILE},
     error::Error,
     prelude::*,
-    target::TargetType,
+    target::Target,
     templates::{ServiceParams, SpecParams},
 };
 use abscissa_core::Command;
@@ -117,20 +117,13 @@ impl InitCmd {
         // Autodetect whether to place target files in `/usr/bin` or `/usr/sbin`
         let use_sbin = self.sbin;
 
-        // Autodetect target types
-        let targets = match TargetType::detect(&crate_root)? {
-            TargetType::Lib => {
-                if self.force {
-                    // If forced, just return an empty target list
-                    vec![]
-                } else {
-                    status_err!("detected unsupported crate type: library (-f to override)");
-                    process::exit(1);
-                }
-            }
-            TargetType::Bin => vec![pkg_name.clone()],
-            TargetType::MultiBin(targets) => targets,
-        };
+        // Autodetect targets
+        let targets = Target::detect(&crate_root)?;
+
+        if targets.is_empty() && !self.force {
+            status_err!("failed to detect supported targets (-f to override)");
+            process::exit(1);
+        }
 
         // Create `.rpm` directory
         fs::create_dir(&rpm_config_dir)?;
@@ -144,9 +137,10 @@ impl InitCmd {
         let spec_path = rpm_config_dir.join(format!("{}.spec", pkg_name));
         let spec_params = SpecParams::new(
             pkg_name.clone(),
-            &config.package(),
+            config.package(),
             service_name.clone(),
             use_sbin,
+            &targets,
         );
         render_spec(&spec_path, &self.template, &spec_params)?;
 

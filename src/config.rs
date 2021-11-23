@@ -1,6 +1,6 @@
 //! `Cargo.toml` parser specialized for the `cargo rpm` use case
 
-use crate::{error::Error, prelude::*};
+use crate::{error::Error, prelude::*, target::Target};
 use serde::Deserialize;
 use std::{
     collections::BTreeMap,
@@ -12,6 +12,13 @@ use std::{
 
 /// Cargo configuration for the current project
 pub const CARGO_CONFIG_FILE: &str = "Cargo.toml";
+
+/// Directory in which cydlibs are placed
+/// https://docs.fedoraproject.org/en-US/packaging-guidelines/RPMMacros/#_macros_for_paths_set_and_used_by_build_systems
+#[cfg(target_pointer_width = "64")]
+const LIB_DIR: &str = "/usr/lib64";
+#[cfg(not(target_pointer_width = "64"))]
+const LIB_DIR: &str = "/usr/lib";
 
 /// The parts of `Cargo.toml` that `cargo rpm` cares about
 #[derive(Debug, Default, Deserialize)]
@@ -161,7 +168,7 @@ pub struct FileConfig {
 pub fn append_rpm_metadata(
     pkg_name: &str,
     path: &Path,
-    targets: &[String],
+    targets: &[Target],
     extra_files: &[PathBuf],
     bin_dir: &Path,
 ) -> Result<(), Error> {
@@ -183,12 +190,24 @@ pub fn append_rpm_metadata(
     writeln!(cargo_toml, "\n[package.metadata.rpm.targets]")?;
 
     for target in targets {
-        writeln!(
-            cargo_toml,
-            "{} = {{ path = {:?} }}",
-            target,
-            bin_dir.join(target)
-        )?;
+        match target {
+            Target::Bin(name) => {
+                writeln!(
+                    cargo_toml,
+                    "{} = {{ path = {:?} }}",
+                    name,
+                    bin_dir.join(name)
+                )?;
+            }
+            Target::Cdylib(name) => {
+                writeln!(
+                    cargo_toml,
+                    "\"{filename}\" = {{ path = \"{dir}/{filename}\" }}",
+                    dir = LIB_DIR,
+                    filename = format!("lib{}.so", name.replace("-", "_")),
+                )?;
+            }
+        }
     }
 
     // These files come from the .rpm directory
