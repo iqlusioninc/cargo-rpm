@@ -1,3 +1,12 @@
+# 🚨 UNMAINTAINED! 🚨
+
+This crate is no longer maintained. For more information, please see the [maintenance status issue](https://github.com/iqlusioninc/cargo-rpm/issues/96).
+
+We recommend either of the following as alternatives:
+
+- [`cargo-generate-rpm`](https://github.com/cat-in-136/cargo-generate-rpm)
+- [`rust2rpm`](https://pagure.io/fedora-rust/rust2rpm)
+
 # cargo-rpm
 
 [![Crate][crate-image]][crate-link]
